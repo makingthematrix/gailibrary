@@ -1,5 +1,5 @@
 # GAI Library
-## A very cheerful library for Artificial Intelligence in games using cellular automata and written in Rust
+## A very cheerful library for Artificial Intelligence in games
 
 Hello, my name is Maciej Gorywoda, and this is my attempt at creating a library for Artificial Intelligence in games, and at the same time to learn Rust. 
 
@@ -10,8 +10,8 @@ This is my first project in Rust. I plan to bring in all the programming experie
 ### The current state of affairs
 
 The initial design document is ready:
-* [https://github.com/makingthematrix/gailibrary/wiki/GAI-Library---initial-design](GAI Library - the initial design)
+* [GAI Library - the initial design](https://github.com/makingthematrix/gailibrary/wiki/GAI-Library---initial-design)
 
 It's quite long, still contains some errors (I'm not a native English speaker) and in some place it feels like a stream of conscioussness. I will come back to it over time and edit it.
 
-The next step is to create a bunch of GitHub issues based on what I wrote about in the initial design. And then to slowly work through them. I hope I will be able to finish it in 2018 (I'm writing these words on the New Year's Eve :) ). Still, if you have any thoughts, comments, wishes, questions, whatever, feel free to contact me. You can open an issue or you can reach me on Twitter ( [https://twitter.com/makingthematrix](@makingthematrix) ) or Wire (@maciek).
+The next step is to create a bunch of GitHub issues based on what I wrote about in the initial design. And then to slowly work through them. I hope I will be able to finish it in 2018 (I'm writing these words on the New Year's Eve :) ). Still, if you have any thoughts, comments, wishes, questions, whatever, feel free to contact me. You can open an issue or you can reach me on Twitter ( [@makingthematrix](https://twitter.com/makingthematrix) ) or Wire (@maciek).
