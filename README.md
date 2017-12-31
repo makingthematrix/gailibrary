@@ -10,7 +10,7 @@ This is my first project in Rust. I plan to bring in all the programming experie
 ### The current state of affairs
 
 The initial design document is ready:
-* [GAI Library - the initial design](https://github.com/makingthematrix/gailibrary/wiki/GAI-Library---initial-design)
+* [The Initial Design main page](https://github.com/makingthematrix/gailibrary/wiki/Initial-Design)
 
 It's quite long, still contains some errors (I'm not a native English speaker) and in some place it feels like a stream of conscioussness. I will be coming back to it over time and edit it.
 
