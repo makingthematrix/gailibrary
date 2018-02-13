@@ -1,0 +1,53 @@
+[tasks.fast]
+description = "Fast compilation"
+command = "cargo"
+args = ["check"]
+
+[tasks.full]
+dependencies = [
+    "clean",
+    "fmt",
+    "clippy",
+    "build",
+    "test",
+    "docs",
+    "move-docs"
+]
+
+[tasks.release]
+command = "cargo"
+args = ["build", "--release"]
+
+[tasks.clean]
+command = "cargo"
+args = ["clean"]
+
+[tasks.fmt]
+command = "cargo"
+args = ["fmt", "--all"]
+
+[tasks.clippy]
+command = "cargo"
+args = ["clippy"]
+
+[tasks.build]
+command = "cargo"
+args = ["build"]
+
+[tasks.test]
+command = "cargo"
+args = ["test"]
+
+[tasks.docs]
+description = "Generates Rust documentation."
+command = "cargo"
+args = ["doc", "--no-deps"]
+
+[tasks.move-docs]
+description = "Moves the generated documentation to the docs/api directory."
+dependencies = ["docs"]
+script = [
+    "rm -fR ./docs/api",
+    "mkdir -p ./docs/api",
+    "mv ./target/doc/* ./docs/api"
+]

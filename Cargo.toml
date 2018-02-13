@@ -1,0 +1,18 @@
+[package]
+name = "gailibrary"
+version = "0.1.0"
+authors = ["Maciej Gorywoda <makingthematrix@gmail.com>"]
+
+[dependencies]
+rand = "0.4.2"
+flexi_logger = "0.6"
+log = "*"
+
+[dev-dependencies]
+quickcheck = "0.6.1"
+spectral = "0.6.0"
+criterion = "0.2.0"
+
+[[bench]]
+name = "criterion_tests"
+harness = false
