@@ -1,11 +1,5 @@
-[tasks.fast]
-description = "Fast compilation"
-command = "cargo"
-args = ["check"]
-
 [tasks.full]
 dependencies = [
-    "clean",
     "fmt",
     "clippy",
     "build",
@@ -17,10 +11,6 @@ dependencies = [
 [tasks.release]
 command = "cargo"
 args = ["build", "--release"]
-
-[tasks.clean]
-command = "cargo"
-args = ["clean"]
 
 [tasks.fmt]
 command = "cargo"
