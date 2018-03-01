@@ -6,10 +6,16 @@ extern crate quickcheck;
 extern crate spectral;
 
 extern crate flexi_logger;
+
 #[macro_use]
 extern crate log;
 
+extern crate cgmath;
+
+extern crate float_cmp;
+
 pub mod ids;
+pub mod math;
 
 use flexi_logger::*;
 
