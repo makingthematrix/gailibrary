@@ -5,7 +5,7 @@ use float_cmp::ApproxEqUlps;
 
 use std::ops::{Add, Deref, Mul, Sub};
 
-/// A thin wrapper over `cgmath::Point3<f64>` using the Newtype idiom (https://rustbyexample.com/generics/new_types.html)
+/// A thin wrapper over `cgmath::Point3<f64>` using the Newtype idiom.
 ///
 /// The idea is to give the user an easy way to convert between  whatever they use in the physics'
 /// engine and GAI, and give them a few most usable utility methods, ie. computing the distance,
@@ -49,8 +49,8 @@ impl From<Point3<f64>> for Position {
 
 impl<'a> From<&'a [f64]> for Position {
     fn from(p: &'a [f64]) -> Self {
-        let x = if p.len() > 0 { p[0] } else { 0.0 };
-        let y = if p.len() > 1 { p[1] } else { 0.0 };
+        let x = p[0];
+        let y = p[1];
         let z = if p.len() > 2 { p[2] } else { 0.0 };
         Position::new(x, y, z)
     }
@@ -115,8 +115,8 @@ impl From<Vector3<f64>> for Direction {
 
 impl<'a> From<&'a [f64]> for Direction {
     fn from(p: &'a [f64]) -> Self {
-        let x = if p.len() > 0 { p[0] } else { 0.0 };
-        let y = if p.len() > 1 { p[1] } else { 0.0 };
+        let x = p[0];
+        let y = p[1];
         let z = if p.len() > 2 { p[2] } else { 0.0 };
         Direction::new(x, y, z)
     }
