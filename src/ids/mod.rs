@@ -1,14 +1,33 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::hash::Hash;
+use std::fmt::Debug;
+
+macro_rules! reg_priv {
+    ($s:expr, $name:expr, $map:expr) => {{
+        if $s.contains($name) {
+            $map[&$name]
+        } else {
+            $s.names.insert($name);
+            let id = $s.first_free.fetch_add(1, Ordering::SeqCst);
+            $map.insert($name, id);
+            id
+        }
+    }}
+}
 
 pub type ValueId = usize;
 pub type CellTypeId = usize;
 
+macro_rules! reg {
+    ($s:expr, $name:expr, values) => (reg_priv!($s, $name, $s.values) as ValueId);
+    ($s:expr, $name:expr, cell_types) => (reg_priv!($s, $name, $s.cell_types) as CellTypeId);
+}
+
 #[derive(Debug, Default)]
 pub struct Identifiers<S>
 where
-    S: AsRef<str> + Eq + Hash + Copy,
+    S: AsRef<str> + Eq + Hash + Copy + Debug,
 {
     first_free: AtomicUsize,
     names: HashSet<S>,
@@ -18,10 +37,9 @@ where
 
 pub static NO_ID: usize = 0;
 
-// TODO: use macros instead of inline functions (especially for 'reg...')
 impl<S> Identifiers<S>
 where
-    S: AsRef<str> + Eq + Hash + Copy,
+    S: AsRef<str> + Eq + Hash + Copy + Debug,
 {
     pub fn default() -> Self {
         Identifiers {
@@ -29,16 +47,6 @@ where
             names: HashSet::new(),
             values: HashMap::new(),
             cell_types: HashMap::new(),
-        }
-    }
-
-    #[inline]
-    fn reg_name(&mut self, name: S) -> Option<usize> {
-        if self.contains(name) {
-            None
-        } else {
-            self.names.insert(name);
-            Some(self.first_free.fetch_add(1, Ordering::SeqCst))
         }
     }
 
@@ -58,13 +66,7 @@ where
     }
 
     pub fn reg_value(&mut self, name: S) -> ValueId {
-        match self.reg_name(name) {
-            Some(id) => {
-                self.values.insert(name, id);
-                id
-            }
-            None => self.values[&name],
-        }
+        reg!(self, name, values)
     }
 
     pub fn contains_value(&self, id: ValueId) -> bool {
@@ -76,13 +78,7 @@ where
     }
 
     pub fn reg_cell_type(&mut self, name: S) -> CellTypeId {
-        match self.reg_name(name) {
-            Some(id) => {
-                self.cell_types.insert(name, id);
-                id
-            }
-            None => self.cell_types[&name],
-        }
+        reg!(self, name, cell_types)
     }
 
     pub fn contains_cell_type(&self, id: CellTypeId) -> bool {
@@ -115,7 +111,7 @@ mod ids_tests {
             .named("has health")
             .is_true();
         assert_that(&ids.get_value("health"))
-            .named(&"health")
+            .named("health")
             .is_equal_to(&Some(health));
     }
 
@@ -128,6 +124,7 @@ mod ids_tests {
         assert_that(&ids.contains("ammo")).is_true();
         assert_that(&ids.contains("pos")).is_false();
         assert_ne!(health, ammo);
+        assert_that(&ids.is_empty()).named("is empty").is_false();
     }
 
     #[test]
@@ -153,4 +150,41 @@ mod ids_tests {
         }
     }
 
+    #[test]
+    fn should_register_two_cell_type_ids() {
+        let mut ids = Identifiers::default();
+        let player = ids.reg_cell_type("player");
+        let npc = ids.reg_cell_type("npc");
+        assert_that(&ids.contains("player")).is_true();
+        assert_that(&ids.contains("npc")).is_true();
+        assert_that(&ids.contains("wall")).is_false();
+        assert_ne!(player, npc);
+    }
+
+    #[test]
+    fn should_not_mix_types() {
+        let mut ids = Identifiers::default();
+        let player = ids.reg_cell_type("player");
+        let npc = ids.reg_cell_type("npc");
+        let health = ids.reg_value("health");
+        let ammo = ids.reg_value("ammo");
+
+        println!("names: {:?}", ids.names);
+        println!("values: {:?}", ids.values);
+        println!("cell types: {:?}", ids.cell_types);
+
+        assert_that(&ids.len()).named("has size").is_equal_to(&4);
+
+        assert_that(&ids.get_cell_type("player")).is_equal_to(&Some(player));
+        assert_that(&ids.get_value("player")).is_equal_to(&None);
+
+        assert_that(&ids.get_cell_type("npc")).is_equal_to(&Some(npc));
+        assert_that(&ids.get_value("npc")).is_equal_to(&None);
+
+        assert_that(&ids.get_cell_type("health")).is_equal_to(&None);
+        assert_that(&ids.get_value("health")).is_equal_to(&Some(health));
+
+        assert_that(&ids.get_cell_type("ammo")).is_equal_to(&None);
+        assert_that(&ids.get_value("ammo")).is_equal_to(&Some(ammo));
+    }
 }
