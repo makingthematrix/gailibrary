@@ -17,3 +17,5 @@ It's quite long, still contains some errors (I'm not a native English speaker) a
 * [My current backlog and the sprint table](https://github.com/makingthematrix/gailibrary/projects/1)
 
 It's based on the first half of the initial design doc - up to the use case.Now I will slowly work through the tickets. I hope I will be able to finish it in 2018 (I'm writing these words on the New Year's Eve :) ). Still, if you have any thoughts, comments, wishes, questions, whatever, feel free to contact me. You can open an issue or you can reach me on Twitter ([@makingthematrix](https://twitter.com/makingthematrix)) or Wire (@maciek).
+
+You can also check my other project: [ANN](https://github.com/makingthematrix/ann), a research on how can we build asynchronous artificial neural networks using Scala and Akka. No practical applications (yet ;)), but I ran into some interesting conclusions, wrote an amateurish/sciency [paper](https://github.com/makingthematrix/ann/blob/SOSWithBlock_1.0/doc/ArtificialNeuralNetworksInAkka.pdf), and [talked about it](https://www.youtube.com/watch?v=5r4LSQT7Uc4&t=1s).

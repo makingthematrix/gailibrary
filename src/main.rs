@@ -1,17 +1,19 @@
+#![allow(unknown_lints)]
+
 #[cfg(test)]
 #[macro_use]
 extern crate quickcheck;
-
 #[cfg(test)]
 extern crate spectral;
 
 extern crate flexi_logger;
-
 #[macro_use]
 extern crate log;
 
-extern crate cgmath;
+#[macro_use]
+extern crate derive_more;
 
+extern crate cgmath;
 extern crate float_cmp;
 
 pub mod ids;
