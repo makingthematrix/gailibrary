@@ -15,9 +15,11 @@ extern crate derive_more;
 
 extern crate cgmath;
 extern crate float_cmp;
+extern crate time;
 
 pub mod ids;
 pub mod math;
+pub mod cell;
 
 use flexi_logger::*;
 
