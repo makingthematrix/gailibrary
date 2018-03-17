@@ -3,7 +3,7 @@ use cgmath::prelude::*;
 
 use float_cmp::ApproxEqUlps;
 
-use std::ops::{Add, Deref, Mul, Sub};
+use std::ops::{Add, Deref, Mul, Neg, Sub};
 use std::ptr;
 
 /// A thin wrapper over `cgmath::Point3<f64>` using the Newtype idiom.
@@ -71,8 +71,19 @@ impl Deref for Position {
 impl Add<Vector3<f64>> for Position {
     type Output = Position;
 
-    fn add(self, other: Vector3<f64>) -> Position {
-        Position(self.0 + other)
+    fn add(self, v: Vector3<f64>) -> Position {
+        Position(self.0 + v)
+    }
+}
+
+// Not intuitive: Direction is not really a vector. But it can be made into a vector by multiplying
+// by 1.0. I want to avoid code like `position + (direction * 1.0)`, where `* 1.0` is used only for
+// type casting.
+impl Add<Direction> for Position {
+    type Output = Position;
+
+    fn add(self, d: Direction) -> Position {
+        self + *d
     }
 }
 
@@ -81,6 +92,34 @@ impl Sub<Position> for Position {
 
     fn sub(self, other: Position) -> Vector3<f64> {
         self.0 - other.0
+    }
+}
+
+impl Sub<Vector3<f64>> for Position {
+    type Output = Position;
+
+    fn sub(self, v: Vector3<f64>) -> Position {
+        Position(self.0 - v)
+    }
+}
+
+impl Sub<Direction> for Position {
+    type Output = Position;
+
+    fn sub(self, d: Direction) -> Position {
+        self - *d
+    }
+}
+
+impl Neg for Position {
+    type Output = Position;
+
+    fn neg(self) -> Position {
+        Position::new(
+            CENTER.0.x - self.0.x,
+            CENTER.0.y - self.0.y,
+            CENTER.0.z - self.0.z,
+        )
     }
 }
 
@@ -100,6 +139,11 @@ impl Direction {
     #[inline]
     pub fn angle(&self, other: &Direction) -> Deg<f64> {
         Rad::acos(self.0.dot(other.0)).into()
+    }
+
+    #[inline]
+    pub fn cross(&self, other: &Direction) -> Vector3<f64> {
+        self.0.cross(other.0)
     }
 }
 
@@ -126,7 +170,8 @@ impl From<Position> for Direction {
 
 impl PartialEq for Direction {
     fn eq(&self, other: &Direction) -> bool {
-        self.angle(other).0.approx_eq_ulps(&0.0, 2)
+        self.0.x.approx_eq_ulps(&other.0.x, 2) && self.0.y.approx_eq_ulps(&other.0.y, 2)
+            && self.0.z.approx_eq_ulps(&other.0.z, 2)
     }
 }
 
@@ -161,6 +206,22 @@ impl Mul<Direction> for Direction {
 
     fn mul(self, v: Direction) -> f64 {
         self.0.dot(v.0)
+    }
+}
+
+impl Mul<f64> for Direction {
+    type Output = Vector3<f64>;
+
+    fn mul(self, v: f64) -> Vector3<f64> {
+        Vector3::new(self.0.x * v, self.0.y * v, self.0.z * v)
+    }
+}
+
+impl Neg for Direction {
+    type Output = Direction;
+
+    fn neg(self) -> Direction {
+        Direction(-self.0)
     }
 }
 
@@ -245,96 +306,5 @@ impl Mul<Coeff> for Coeff {
 
     fn mul(self, c: Coeff) -> Coeff {
         Coeff::new(self.0 * c.0)
-    }
-}
-
-#[cfg(test)]
-mod math_tests {
-    use math::*;
-    use std::ptr::eq;
-    use spectral::prelude::*;
-    pub use cgmath::*;
-
-    #[test]
-    fn should_compute_distance() {
-        let p1 = Position::new(0.5, 0.5, 0.0);
-        let p2 = Position::new(0.0, 1.0, 0.0);
-        assert_ulps_eq!(p1.distance(&p2), ((0.5 * 0.5 + 0.5 * 0.5) as f64).sqrt());
-    }
-
-    #[test]
-    fn should_points_be_equal() {
-        let p1 = Position::new(0.2, 0.2, 0.2);
-        let p2 = Position::new(0.2, 0.2, 0.2);
-
-        assert_that(&eq(&p1, &p2)).is_false();
-        assert_that(&p1).is_equal_to(&p2);
-        assert_that(&p1.distance(&p2)).is_equal_to(0.0);
-    }
-
-    #[test]
-    fn should_compute_orientation() {
-        let v1 = Direction::new(0.5, 0.5, 0.0); // where the npc is looking
-        let v2 = Direction::new(0.0, 1.0, 0.0); // where the npc should be looking
-
-        let deg = v1.angle(&v2);
-        assert_ulps_eq!(deg, Deg(45.0)); // what are you looking at, npc?!
-    }
-
-    #[test]
-    fn should_compute_position_angle() {
-        let p1 = Position::new(0.5, 0.5, 0.0); // the player's position
-        let v1 = Direction::new(0.0, 1.0, 0.0); // where the player is looking
-        let p2 = Position::new(0.0, 1.0, 0.0); // the npc's position
-
-        let deg = angle_between(p1, v1, p2);
-        assert_ulps_eq!(deg, Deg(45.0)); // guess the npc is safe
-    }
-
-    #[test]
-    fn should_create_coeffs() {
-        assert_that(&Coeff::new(0.0)).is_equal_to(&COEFF_ZERO);
-        assert_that(&Coeff::new(1.0)).is_equal_to(&COEFF_ONE);
-        assert_that(&Coeff::new(0.5)).is_not_equal_to(&COEFF_ZERO);
-        assert_that(&Coeff::new(0.5)).is_not_equal_to(&COEFF_ONE);
-    }
-
-    #[test]
-    fn should_add_coeffs() {
-        let c1 = Coeff::new(0.2);
-        let c2 = Coeff::new(0.5);
-        assert_that(&(c1 + c2)).is_equal_to(&Coeff::new(0.7));
-
-        let c3 = Coeff::new(0.8);
-        assert_that(&(c1 + c3)).is_equal_to(&COEFF_ONE);
-    }
-
-    #[test]
-    fn should_substract_coeffs() {
-        let c1 = Coeff::new(0.7);
-        let c2 = Coeff::new(0.5);
-        assert_that(&(c1 - c2)).is_equal_to(&Coeff::new(0.2));
-    }
-
-    #[test]
-    fn should_multiply_coeffs() {
-        let c1 = Coeff::new(0.5);
-        let c2 = Coeff::new(0.5);
-        assert_that(&(c1 * c2)).is_equal_to(&Coeff::new(0.25));
-    }
-
-    #[test]
-    fn should_normalize() {
-        let v = vec![1.0, 3.0, 4.0, 2.0];
-        let v2 = Coeff::normalize(&v);
-        assert_that(&v).has_length(v2.len());
-        // TODO: Learn why `iter()` is not compiling and `into_iter()` is ok
-        let sum: Coeff = v2.clone().into_iter().sum();
-        assert_that(&sum).is_equal_to(&COEFF_ONE);
-
-        assert_that(&v2[0]).is_equal_to(Coeff::new(0.1));
-        assert_that(&v2[1]).is_equal_to(Coeff::new(0.3));
-        assert_that(&v2[2]).is_equal_to(Coeff::new(0.4));
-        assert_that(&v2[3]).is_equal_to(Coeff::new(0.2));
     }
 }
