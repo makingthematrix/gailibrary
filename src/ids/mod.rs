@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::hash::Hash;
 use std::fmt::Debug;
+use std::hash::Hash;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 #[cfg(test)]
 mod ids_tests;
@@ -16,15 +16,19 @@ macro_rules! reg_priv {
             $map.insert($name, id);
             id
         }
-    }}
+    }};
 }
 
 pub type ValueId = usize;
 pub type CellTypeId = usize;
 
 macro_rules! reg {
-    ($s:expr, $name:expr, values) => (reg_priv!($s, $name, $s.values) as ValueId);
-    ($s:expr, $name:expr, cell_types) => (reg_priv!($s, $name, $s.cell_types) as CellTypeId);
+    ($s:expr, $name:expr,values) => {
+        reg_priv!($s, $name, $s.values) as ValueId
+    };
+    ($s:expr, $name:expr,cell_types) => {
+        reg_priv!($s, $name, $s.cell_types) as CellTypeId
+    };
 }
 
 #[derive(Debug, Default)]

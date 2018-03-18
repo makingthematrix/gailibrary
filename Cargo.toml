@@ -11,6 +11,7 @@ cgmath = "0.16.0"
 float-cmp = "0.3.0"
 derive_more = "0.8.0"
 time = "0.1"
+failure = "0.1.1"
 
 [dev-dependencies]
 quickcheck = "0.6.1"
