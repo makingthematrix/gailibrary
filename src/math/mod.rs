@@ -1,5 +1,5 @@
-use cgmath::{Deg, Point3, Rad, Vector3};
 use cgmath::prelude::*;
+use cgmath::{Deg, Point3, Rad, Vector3};
 
 use float_cmp::ApproxEqUlps;
 

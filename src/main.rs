@@ -4,6 +4,7 @@
 #[macro_use]
 extern crate quickcheck;
 #[cfg(test)]
+#[macro_use]
 extern crate spectral;
 
 extern crate flexi_logger;
@@ -17,9 +18,10 @@ extern crate cgmath;
 extern crate float_cmp;
 extern crate time;
 
+pub mod cell;
 pub mod ids;
 pub mod math;
-pub mod cell;
+pub mod utils;
 
 use flexi_logger::*;
 
