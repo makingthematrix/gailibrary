@@ -68,6 +68,7 @@ where
         UMap::with_capacity(0)
     }
 
+    #[inline]
     pub fn with_capacity(size: usize) -> Self {
         UMap {
             vec: vec![None; size],

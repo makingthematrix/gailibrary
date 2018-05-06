@@ -56,10 +56,12 @@ impl<'a> DoubleEndedIterator for USetIter<'a> {
 }
 
 impl USet {
+    #[inline]
     pub fn new() -> Self {
         USet::with_capacity(0)
     }
 
+    #[inline]
     pub fn with_capacity(size: usize) -> Self {
         USet {
             vec: vec![false; size],
@@ -67,14 +69,17 @@ impl USet {
         }
     }
 
+    #[inline]
     pub fn len(&self) -> usize {
         self.len
     }
 
+    #[inline]
     pub fn is_empty(&self) -> bool {
         self.len == 0
     }
 
+    #[inline]
     pub fn capacity(&self) -> usize {
         self.vec.len()
     }
@@ -104,6 +109,7 @@ impl USet {
         d
     }
 
+    #[inline]
     pub fn iter(&self) -> USetIter {
         USetIter {
             handle: self,
@@ -154,6 +160,7 @@ impl USet {
         USet { vec: set, len }
     }
 
+    #[inline]
     pub fn from_fields(set: Vec<bool>, len: usize) -> Self {
         debug_assert_eq!(len, set.iter().filter(|&b| *b).count());
         USet { vec: set, len }
