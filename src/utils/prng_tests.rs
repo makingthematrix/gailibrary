@@ -74,13 +74,20 @@ mod prng_tests {
         for _i in 0..SAMPLES {
             let res: f64 = r.gen();
             asum += res;
-            if res < min { min = res };
-            if res > max { max = res };
+            if res < min {
+                min = res
+            };
+            if res > max {
+                max = res
+            };
             rsum += (0.5 - res).powi(2);
         }
 
         let avg = asum / (SAMPLES as f64);
         let dev = (rsum / (SAMPLES as f64)).sqrt();
-        println!("min:{:?}, max: {:?}, avg: {:?}, dev: {:?}", min, max, avg, dev);
+        println!(
+            "min:{:?}, max: {:?}, avg: {:?}, dev: {:?}",
+            min, max, avg, dev
+        );
     }
 }

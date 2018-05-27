@@ -1,9 +1,8 @@
 use math;
 use time;
 
-use std::ops::{Add, Div, Mul, Neg, Sub};
-
 use cgmath::Vector3;
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[cfg(test)]
 mod cell_tests;
@@ -148,5 +147,31 @@ impl Neg for Value {
             Value::Time(_) => panic!("-Time is not supported"),
             Value::Duration(d) => Value::Duration(-d),
         }
+    }
+}
+
+// new approach
+
+use std::marker::PhantomData;
+
+#[derive(Debug, Eq, PartialEq, Hash)]
+pub struct ValueId<T> {
+    id: usize,
+    _marker: PhantomData<T>,
+}
+
+impl<T> ValueId<T> {
+    pub fn new(id: usize) -> ValueId<T> {
+        ValueId::<T> {
+            id,
+            _marker: PhantomData,
+        }
+    }
+}
+
+pub const fn new_id<T>(id: usize) -> ValueId<T> {
+    ValueId::<T> {
+        id,
+        _marker: PhantomData,
     }
 }

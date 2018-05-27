@@ -40,4 +40,31 @@ mod cell_tests {
     }
 
     // tests for invalid operations?
+
+    // new approach
+
+    trait Foo<T> {
+        fn foo(id: ValueId<T>) -> T;
+    }
+
+    impl Foo<usize> for ValueId<usize> {
+        fn foo(_id: ValueId<usize>) -> usize {
+            42
+        }
+    }
+
+    impl Foo<&'static str> for ValueId<&'static str> {
+        fn foo(_id: ValueId<&'static str>) -> &'static str {
+            "thanks for all the fish"
+        }
+    }
+
+    #[test]
+    fn choose_function_based_on_valueid_type() {
+        let id_usize = ValueId::<usize>::new(1);
+        assert_that!(ValueId::foo(id_usize)).is_equal_to(42);
+        let id_str = ValueId::<&'static str>::new(2);
+        assert_that!(ValueId::foo(id_str)).is_equal_to("thanks for all the fish");
+    }
+
 }
