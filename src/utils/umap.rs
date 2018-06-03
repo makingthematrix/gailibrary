@@ -27,15 +27,15 @@ impl<'a, T> Iterator for UMapIter<'a, T>
 where
     T: Clone + PartialEq,
 {
-    type Item = (usize, T);
+    type Item = (usize, &'a T);
 
     fn next(&mut self) -> Option<Self::Item> {
         let max = self.handle.vec.len() - self.rindex;
         while self.index < max {
             let index = self.index;
             self.index += 1;
-            if let Some(&Some(ref value)) = self.handle.vec.get(index) {
-                return Some((index, value.clone()));
+            if let Some(ref value) = self.handle.vec[index] {
+                return Some((index, value));
             }
         }
         None
@@ -51,8 +51,8 @@ where
         while self.rindex < len - self.index {
             let index = len - self.rindex - 1;
             self.rindex += 1;
-            if let Some(&Some(ref value)) = self.handle.vec.get(index) {
-                return Some((index, value.clone()));
+            if let Some(ref value) = self.handle.vec[index] {
+                return Some((index, &value));
             }
         }
         None
@@ -260,18 +260,15 @@ where
 {
     fn eq(&self, other: &Self) -> bool {
         self.len == other.len
-            && self.iter()
+            && self
+                .iter()
                 .zip(other.iter())
                 .find(|&((key1, ref value1), (key2, ref value2))| key1 != key2 || value1 != value2)
                 .is_none()
     }
 }
 
-impl<T> Eq for UMap<T>
-where
-    T: Clone + PartialEq,
-{
-}
+impl<T> Eq for UMap<T> where T: Clone + PartialEq {}
 
 impl<'a, T> Add for &'a UMap<T>
 where

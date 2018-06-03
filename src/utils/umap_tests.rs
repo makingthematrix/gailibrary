@@ -58,9 +58,9 @@ mod umap_tests {
 
         let mut iter = map.iter();
 
-        assert_that!(iter.next()).is_equal_to(Some((2, 2)));
-        assert_that!(iter.next()).is_equal_to(Some((4, 4)));
-        assert_that!(iter.next()).is_equal_to(Some((5, 5)));
+        assert_that!(iter.next()).is_equal_to(Some((2, &2)));
+        assert_that!(iter.next()).is_equal_to(Some((4, &4)));
+        assert_that!(iter.next()).is_equal_to(Some((5, &5)));
         assert_that!(iter.next()).is_equal_to(None);
     }
 
@@ -84,28 +84,28 @@ mod umap_tests {
     fn join_maps() {
         let map1: UMap<i32> = vec![(2, 2), (4, 4), (5, 5)].into();
         let mut iter1 = map1.iter();
-        assert_that!(iter1.next()).is_equal_to(Some((2, 2)));
-        assert_that!(iter1.next()).is_equal_to(Some((4, 4)));
-        assert_that!(iter1.next()).is_equal_to(Some((5, 5)));
+        assert_that!(iter1.next()).is_equal_to(Some((2, &2)));
+        assert_that!(iter1.next()).is_equal_to(Some((4, &4)));
+        assert_that!(iter1.next()).is_equal_to(Some((5, &5)));
         assert_that!(iter1.next()).is_equal_to(None);
 
         let map2: UMap<i32> = vec![(1, 1), (3, 3), (5, 5), (8, 8)].into();
         let mut iter2 = map2.iter();
-        assert_that!(iter2.next()).is_equal_to(Some((1, 1)));
-        assert_that!(iter2.next()).is_equal_to(Some((3, 3)));
-        assert_that!(iter2.next()).is_equal_to(Some((5, 5)));
-        assert_that!(iter2.next()).is_equal_to(Some((8, 8)));
+        assert_that!(iter2.next()).is_equal_to(Some((1, &1)));
+        assert_that!(iter2.next()).is_equal_to(Some((3, &3)));
+        assert_that!(iter2.next()).is_equal_to(Some((5, &5)));
+        assert_that!(iter2.next()).is_equal_to(Some((8, &8)));
         assert_that!(iter2.next()).is_equal_to(None);
 
         let map3 = &map1 + &map2;
         assert_that!(map3.len()).is_equal_to(6);
         let mut iter3 = map3.iter();
-        assert_that!(iter3.next()).is_equal_to(Some((1, 1)));
-        assert_that!(iter3.next()).is_equal_to(Some((2, 2)));
-        assert_that!(iter3.next()).is_equal_to(Some((3, 3)));
-        assert_that!(iter3.next()).is_equal_to(Some((4, 4)));
-        assert_that!(iter3.next()).is_equal_to(Some((5, 5)));
-        assert_that!(iter3.next()).is_equal_to(Some((8, 8)));
+        assert_that!(iter3.next()).is_equal_to(Some((1, &1)));
+        assert_that!(iter3.next()).is_equal_to(Some((2, &2)));
+        assert_that!(iter3.next()).is_equal_to(Some((3, &3)));
+        assert_that!(iter3.next()).is_equal_to(Some((4, &4)));
+        assert_that!(iter3.next()).is_equal_to(Some((5, &5)));
+        assert_that!(iter3.next()).is_equal_to(Some((8, &8)));
         assert_that!(iter3.next()).is_equal_to(None);
     }
 
@@ -117,7 +117,7 @@ mod umap_tests {
         let map3 = &map1 * &map2;
         assert_that!(map3.len()).is_equal_to(1);
         let mut iter3 = map3.iter();
-        assert_that!(iter3.next()).is_equal_to(Some((5, 5)));
+        assert_that!(iter3.next()).is_equal_to(Some((5, &5)));
         assert_that!(iter3.next()).is_equal_to(None);
     }
 
@@ -129,8 +129,8 @@ mod umap_tests {
         let map3 = &map1 - &map2;
         assert_that!(map3.len()).is_equal_to(2);
         let mut iter3 = map3.iter();
-        assert_that!(iter3.next()).is_equal_to(Some((2, 2)));
-        assert_that!(iter3.next()).is_equal_to(Some((4, 4)));
+        assert_that!(iter3.next()).is_equal_to(Some((2, &2)));
+        assert_that!(iter3.next()).is_equal_to(Some((4, &4)));
         assert_that!(iter3.next()).is_equal_to(None);
     }
 
@@ -142,13 +142,12 @@ mod umap_tests {
         let map3 = &map1 ^ &map2;
         assert_that!(map3.len()).is_equal_to(5);
         let mut iter3 = map3.iter();
-        assert_that!(iter3.next()).is_equal_to(Some((1, 1)));
-        assert_that!(iter3.next()).is_equal_to(Some((2, 2)));
-        assert_that!(iter3.next()).is_equal_to(Some((3, 3)));
-        assert_that!(iter3.next()).is_equal_to(Some((4, 4)));
-        assert_that!(iter3.next()).is_equal_to(Some((8, 8)));
+        assert_that!(iter3.next()).is_equal_to(Some((1, &1)));
+        assert_that!(iter3.next()).is_equal_to(Some((2, &2)));
+        assert_that!(iter3.next()).is_equal_to(Some((3, &3)));
+        assert_that!(iter3.next()).is_equal_to(Some((4, &4)));
+        assert_that!(iter3.next()).is_equal_to(Some((8, &8)));
         assert_that!(iter3.next()).is_equal_to(None);
         assert_that!(iter3.next()).is_equal_to(None);
     }
-
 }

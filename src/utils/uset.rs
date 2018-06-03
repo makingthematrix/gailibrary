@@ -264,7 +264,8 @@ impl USet {
 impl PartialEq for USet {
     fn eq(&self, other: &USet) -> bool {
         self.len == other.len
-            && self.vec
+            && self
+                .vec
                 .iter()
                 .zip(other.vec.iter())
                 .find(|&(&a, &b)| a != b)

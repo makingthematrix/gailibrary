@@ -24,10 +24,10 @@ extern crate num;
 extern crate num_derive;
 
 pub mod cell;
+pub mod enums;
 pub mod ids;
 pub mod math;
 pub mod utils;
-pub mod enums;
 
 use flexi_logger::*;
 

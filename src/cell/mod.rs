@@ -175,3 +175,54 @@ pub const fn new_id<T>(id: usize) -> ValueId<T> {
         _marker: PhantomData,
     }
 }
+
+/*
+trait CellData<T> {
+    fn get(&self, id: ValueId<T>) -> Option<T>;
+    fn set<F>(&mut self, id: ValueId<T>, update: F)
+    where
+        F: Fn(&Self) -> T;
+}
+
+impl<'a> CellData<WhiteBlack> for LangtonsAnt {
+    fn get(&self, id: ValueId<WhiteBlack>) -> Option<WhiteBlack> {
+        if id == LangtonsAnt::COLOR_ID {
+            Some(self.color)
+        } else {
+            None
+        }
+    }
+
+    fn set<F>(&mut self, id: ValueId<WhiteBlack>, update: F)
+    where
+        F: Fn(&Self) -> WhiteBlack,
+    {
+        if id == LangtonsAnt::COLOR_ID {
+            self.color = update(self);
+        }
+    }
+}
+
+impl<'a> CellData<Dir2D> for LangtonsAnt {
+    fn get(&self, id: ValueId<Dir2D>) -> Option<Dir2D> {
+        if id == LangtonsAnt::DIR_ID {
+            Some(self.dir)
+        } else {
+            None
+        }
+    }
+
+    fn set<F>(&mut self, id: ValueId<Dir2D>, update: F)
+    where
+        F: Fn(&Self) -> Dir2D,
+    {
+        if id == LangtonsAnt::DIR_ID {
+            self.dir = update(self);
+        }
+    }
+}
+
+    //const COLOR_ID: ValueId<WhiteBlack> = new_id::<WhiteBlack>(1);
+    //const DIR_ID: ValueId<Dir2D> = new_id::<Dir2D>(2);
+
+*/

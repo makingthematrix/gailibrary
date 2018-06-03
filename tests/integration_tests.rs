@@ -3,247 +3,386 @@
 
 extern crate gailibrary;
 
-use gailibrary::cell::*;
-use gailibrary::enums::white_black::*;
 use gailibrary::enums::dir_2d::*;
+use gailibrary::enums::white_black::*;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+use std::fmt;
+
+use std::cell::RefCell;
+use std::rc::{Rc, Weak};
+
+use std::iter::FromIterator;
+
+use gailibrary::utils::umap::*;
+
+#[derive(Clone)]
 pub struct LangtonsAnt {
     color: WhiteBlack,
     dir: Dir2D,
     pos: (usize, usize),
+    grid: Weak<Grid<LangtonsAnt>>,
+}
+
+impl fmt::Debug for LangtonsAnt {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "LangtonsAnt(color: {}, dir: {}, pos: ({}, {}))",
+            self.color, self.dir, self.pos.0, self.pos.1
+        )
+    }
+}
+
+impl PartialEq for LangtonsAnt {
+    fn eq(&self, other: &LangtonsAnt) -> bool {
+        self.pos.0 == other.pos.0 && self.pos.1 == other.pos.1
+    }
 }
 
 impl LangtonsAnt {
-    const COLOR_ID: ValueId<WhiteBlack> = new_id::<WhiteBlack>(1);
-    const DIR_ID: ValueId<Dir2D> = new_id::<Dir2D>(2);
-
-    pub fn new(x: usize, y: usize) -> Self {
+    pub fn new(x: usize, y: usize, grid: Weak<Grid<LangtonsAnt>>) -> Self {
         LangtonsAnt {
             color: WhiteBlack::White,
             dir: Dir2D::None,
             pos: (x, y),
+            grid: grid,
         }
     }
 
-    pub fn update_color<'a>(cell: &LangtonsAnt, _nd: &AntNeighborhood<'a>) -> WhiteBlack {
-        if cell.dir == Dir2D::None { cell.color } else { cell.color.toggle() }
+    pub fn new_ant(x: usize, y: usize, grid: Weak<Grid<LangtonsAnt>>) -> Self {
+        LangtonsAnt {
+            color: WhiteBlack::White,
+            dir: Dir2D::Up,
+            pos: (x, y),
+            grid,
+        }
     }
 
-    pub fn update_dir<'a>(cell: &LangtonsAnt, nd: &AntNeighborhood<'a>) -> Dir2D {
-        if cell.dir == Dir2D:: None {
-            if let Some(ant_dir) = Dir2D::iter().find(|&d| nd.get_if(d as usize, |c| c.dir == d.turn_around()).is_some()) {
-                if cell.color == WhiteBlack::White {
+    #[inline]
+    pub fn x(&self) -> usize {
+        self.pos.0
+    }
+
+    #[inline]
+    pub fn y(&self) -> usize {
+        self.pos.1
+    }
+
+    #[inline]
+    fn grid(&self) -> Rc<Grid<LangtonsAnt>> {
+        self.grid.upgrade().unwrap()
+    }
+
+    fn update_color(&self) -> WhiteBlack {
+        if self.dir == Dir2D::None {
+            self.color
+        } else {
+            self.color.toggle()
+        }
+    }
+
+    pub fn update_dir(&self) -> Dir2D {
+        if self.dir == Dir2D::None {
+            if let Some((.., ant_dir)) = self
+                .grid()
+                .all_near(self)
+                .find(|c, d| c.dir == d.turn_around())
+            {
+                if self.color == WhiteBlack::White {
                     ant_dir.turn_left()
                 } else {
                     ant_dir.turn_right()
                 }
             } else {
-                Dir2D:: None
+                Dir2D::None
             }
         } else {
             Dir2D::None
         }
     }
 
-}
-
-pub struct Cell<'a, T: 'a> {
-    data: T,
-    graph: &'a CellGraph<'a, T>,
-}
-
-trait CellData<T> {
-    fn get(&self, id: ValueId<T>) -> Option<T>;
-    fn set<F>(&mut self, id: ValueId<T>, update: F) where F: Fn(&Self) -> T;
-}
-
-impl CellData<WhiteBlack> for LangtonsAnt {
-    fn get(&self, id: ValueId<WhiteBlack>) -> Option<WhiteBlack> {
-        if id == LangtonsAnt::COLOR_ID {
-            Some(self.color)
-        } else {
-            None
-        }
-    }
-
-    fn set<F>(&mut self, id: ValueId<WhiteBlack>, update: F) where F: Fn(&Self) -> WhiteBlack {
-        if id == LangtonsAnt::COLOR_ID {
-            self.color = update(self);
+    pub fn update(&self) -> Self {
+        LangtonsAnt {
+            color: self.update_color(),
+            dir: self.update_dir(),
+            pos: (self.pos.0, self.pos.1),
+            grid: self.grid.clone(),
         }
     }
 }
 
-impl CellData<Dir2D> for LangtonsAnt {
-    fn get(&self, id: ValueId<Dir2D>) -> Option<Dir2D> {
-        if id == LangtonsAnt::DIR_ID {
-            Some(self.dir)
-        } else {
-            None
-        }
+pub struct Neighborhood<T>(Vec<Weak<T>>);
+
+impl Neighborhood<LangtonsAnt> {
+    pub fn new(
+        up: Weak<LangtonsAnt>,
+        right: Weak<LangtonsAnt>,
+        down: Weak<LangtonsAnt>,
+        left: Weak<LangtonsAnt>,
+    ) -> Self {
+        Neighborhood(vec![up, right, down, left])
     }
 
-    fn set<F>(&mut self, id: ValueId<Dir2D>, update: F) where F: Fn(&Self) -> Dir2D {
-        if id == LangtonsAnt::DIR_ID {
-            self.dir = update(self);
-        }
+    pub fn find<F>(&self, pred: F) -> Option<(Weak<LangtonsAnt>, Dir2D)>
+    where
+        F: Fn(&LangtonsAnt, Dir2D) -> bool,
+    {
+        let dir = Dir2D::iter().find(|&dir| {
+            let vec = &self.0;
+            let index = dir as usize;
+
+            let link = &vec[index];
+            if let Some(cell) = link.upgrade() {
+                pred(&cell, dir)
+            } else {
+                false
+            }
+        });
+
+        dir.map(|d| (self.0[d as usize].clone(), d))
     }
 }
 
-pub struct Grid {
-    grid: Vec<LangtonsAnt>,
+impl fmt::Debug for Neighborhood<LangtonsAnt> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let vec = &self.0;
+        let u = vec[0].upgrade().unwrap();
+        let r = vec[1].upgrade().unwrap();
+        let d = vec[2].upgrade().unwrap();
+        let l = vec[3].upgrade().unwrap();
+
+        write!(
+            f,
+            "Neighborhood<LangtonsAnt>(\nUP   : {:?},\nRIGHT: {:?},\nDOWN : {:?},\nLEFT : {:?})",
+            u, r, d, l
+        )
+    }
+}
+
+pub struct Grid<T> {
+    vec: RefCell<Vec<Option<Weak<T>>>>,
     dim: usize,
 }
 
-impl<'a> Grid {
-    fn new(dim: usize) -> Self {
-        let mut grid: Vec<LangtonsAnt> = Vec::with_capacity(dim * dim);
-        for x in 0..dim {
-            for y in 0..dim {
-                grid.push(LangtonsAnt::new(x, y));
+impl Grid<LangtonsAnt> {
+    pub fn new(dim: usize) -> Self {
+        Grid {
+            vec: RefCell::new(vec![None; dim * dim]),
+            dim,
+        }
+    }
+
+    pub fn update(&self, arena: &Arena<LangtonsAnt>) {
+        let mut ref_mut = self.vec.borrow_mut();
+        arena.for_each(|cell| {
+            ref_mut[cell.x() * self.dim + cell.y()] = Some(Rc::downgrade(cell));
+        });
+    }
+
+    pub fn insert(&self, x: usize, y: usize, cell: Weak<LangtonsAnt>) {
+        let mut ref_mut = self.vec.borrow_mut();
+        ref_mut[x * self.dim + y] = Some(cell);
+    }
+
+    pub fn exists<F>(&self, index: usize, pred: F) -> bool
+    where
+        F: Fn(&LangtonsAnt) -> bool,
+    {
+        let vec = self.vec.borrow();
+        if index >= vec.len() {
+            return false;
+        }
+
+        if let Some(ref link) = vec[index] {
+            if let Some(cell) = link.upgrade() {
+                pred(&cell)
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    }
+
+    #[inline]
+    pub fn get(&self, x: usize, y: usize) -> Option<Weak<LangtonsAnt>> {
+        let rf = self.vec.borrow();
+        rf[x * self.dim + y].clone()
+    }
+
+    #[inline]
+    fn get_with_offset(&self, x: usize, offx: i64, y: usize, offy: i64) -> Weak<LangtonsAnt> {
+        let xi: usize = if x == 0 && offx == -1 {
+            self.dim - 1
+        } else if x == self.dim - 1 && offx == 1 {
+            0
+        } else {
+            (x as i64 + offx) as usize
+        };
+        let yi: usize = if y == 0 && offy == -1 {
+            self.dim - 1
+        } else if y == self.dim - 1 && offy == 1 {
+            0
+        } else {
+            (y as i64 + offy) as usize
+        };
+        let rf = self.vec.borrow();
+        rf[xi * self.dim + yi].clone().unwrap()
+    }
+
+    pub fn all_near(&self, cell: &LangtonsAnt) -> Neighborhood<LangtonsAnt> {
+        let u = self.get_with_offset(cell.x(), 0, cell.y(), -1);
+        let r = self.get_with_offset(cell.x(), 1, cell.y(), 0);
+        let d = self.get_with_offset(cell.x(), 0, cell.y(), 1);
+        let l = self.get_with_offset(cell.x(), -1, cell.y(), 0);
+
+        Neighborhood::new(u, r, d, l)
+    }
+}
+
+pub struct Arena<T>(UMap<Rc<T>>);
+
+impl Arena<LangtonsAnt> {
+    pub fn new(capacity: usize) -> Self {
+        Arena(UMap::<Rc<LangtonsAnt>>::with_capacity(capacity))
+    }
+
+    pub fn init(&mut self, grid: &Rc<Grid<LangtonsAnt>>) {
+        let dim = grid.dim;
+        for i in 0..dim {
+            for j in 0..dim {
+                self.0.put(
+                    i * dim + j,
+                    Rc::new(LangtonsAnt::new(i, j, Rc::downgrade(grid))),
+                );
             }
         }
-        Grid { grid, dim }
     }
 
-    #[inline]
-    pub fn cell(&'a self, x: usize, y: usize) -> &'a LangtonsAnt {
-        &self.grid[x * self.dim + y]
+    pub fn insert(&self, id: usize, cell: &Rc<LangtonsAnt>) -> Self {
+        let updated: Vec<(usize, Rc<LangtonsAnt>)> = self
+            .0
+            .iter()
+            .map(|(key, value)| {
+                if key != id {
+                    (key, value.clone())
+                } else {
+                    (id, cell.clone())
+                }
+            })
+            .collect();
+        let umap: UMap<Rc<LangtonsAnt>> = updated.into();
+        Arena(umap)
     }
 
-    fn neighborhood(&'a self, c: &LangtonsAnt) -> AntNeighborhood<'a> {
-        let x = c.pos.0;
-        let y = c.pos.1;
-        let last = self.dim - 1;
-        let up = if y == 0 {
-            self.cell(x, last)
-        } else {
-            self.cell(x, y - 1)
-        };
-        let right = if x == last {
-            self.cell(0, y)
-        } else {
-            self.cell(x + 1, y)
-        };
-        let down = if y == last {
-            self.cell(x, 0)
-        } else {
-            self.cell(x, y + 1)
-        };
-        let left = if x == 0 {
-            self.cell(last, y)
-        } else {
-            self.cell(x - 1, y)
-        };
-
-        AntNeighborhood::new(up, right, down, left)
+    pub fn update(&self) -> Self {
+        let updated: Vec<(usize, Rc<LangtonsAnt>)> = self
+            .0
+            .iter()
+            .map(|(key, value)| (key, Rc::new(value.update())))
+            .collect();
+        let umap: UMap<Rc<LangtonsAnt>> = updated.into();
+        Arena(umap)
     }
 
-    fn update_cell(&self, cell: &LangtonsAnt) -> LangtonsAnt {
-        let mut new_cell = *cell;
-        let nd = self.neighborhood(cell);
-        new_cell.set(LangtonsAnt::COLOR_ID, |c: &LangtonsAnt| LangtonsAnt::update_color(c, &nd));
-        new_cell.set(LangtonsAnt::DIR_ID, |c: &LangtonsAnt| LangtonsAnt::update_dir(c, &nd));
+    pub fn for_each<F>(&self, mut f: F)
+    where
+        Self: Sized,
+        F: FnMut(&Rc<LangtonsAnt>),
+    {
+        self.0.iter().for_each(|(.., value)| f(&value));
+    }
 
-        if new_cell != *cell {
-            println!("{:?} -> {:?}", cell, new_cell);
+    pub fn get(&self, id: usize) -> Option<Weak<LangtonsAnt>> {
+        self.0.get(id).map(|c| Rc::downgrade(&c))
+    }
+}
+
+pub struct AntHill {
+    arena: Arena<LangtonsAnt>,
+    grid: Rc<Grid<LangtonsAnt>>,
+}
+
+impl AntHill {
+    pub fn new(dim: usize) -> Self {
+        let mut arena = Arena::<LangtonsAnt>::new(dim * dim);
+        let grid = Rc::new(Grid::new(dim));
+
+        arena.init(&grid);
+        grid.update(&arena);
+
+        AntHill { arena, grid }
+    }
+
+    pub fn update(&mut self) {
+        let arena = self.arena.update();
+        self.grid.update(&arena);
+        self.arena = arena;
+    }
+
+    pub fn insert_ant(&mut self, x: usize, y: usize) {
+        let ant = Rc::new(LangtonsAnt::new_ant(x, y, Rc::downgrade(&self.grid)));
+
+        self.grid.insert(x, y, Rc::downgrade(&ant));
+        let id = x * self.grid.dim + y;
+        self.arena = self.arena.insert(id, &ant);
+    }
+}
+
+trait Visualisation {
+    fn grid(&self) -> (Vec<char>, usize);
+
+    fn print(&self) {
+        let (gr, dim) = self.grid();
+        for i in 0..dim {
+            let a = i * dim;
+            let b = a + dim - 1;
+            println!("{}", String::from_iter(gr[a..b].iter()));
+        }
+    }
+}
+
+impl Visualisation for Grid<LangtonsAnt> {
+    fn grid(&self) -> (Vec<char>, usize) {
+        fn to_char(cell: &Option<Weak<LangtonsAnt>>) -> char {
+            if let Some(ref rf) = cell {
+                if let Some(ant) = rf.upgrade() {
+                    match ant.dir {
+                        Dir2D::None => if ant.color == WhiteBlack::White {
+                            '_'
+                        } else {
+                            'X'
+                        },
+                        Dir2D::Up => '<',
+                        Dir2D::Right => 'v',
+                        Dir2D::Down => '>',
+                        Dir2D::Left => '^',
+                    }
+                } else {
+                    '_'
+                }
+            } else {
+                '_'
+            }
         }
 
-        new_cell
-    }
-
-    fn update(&self) -> Self {
-        let grid: Vec<LangtonsAnt> = self.grid.iter().map(|c| self.update_cell(c)).collect();
-        Grid { grid, dim: self.dim }
-    }
-}
-
-pub struct AntGraph<'a> {
-    grid: &'a Grid
-}
-
-trait CellGraph<'a, T: 'a> {
-    fn all_near(&self, c: &'a T) -> Vec<&'a T> where Self: Sized;
-
-    fn first_near_if<F>(&self, cell: &'a T, pred: F) -> Option<&'a T> where Self: Sized, F: Fn(&'a T) -> bool {
-        let nd = self.all_near(cell);
-        nd.iter().find(|&c| pred(*c)).map(|&c| c)
-    }
-
-    fn all_near_if<F>(&self, cell: &'a T, pred: F) -> Vec<&'a T> where Self: Sized, F: Fn(&'a T) -> bool {
-        let nd = self.all_near(cell);
-        nd.iter().filter_map(|&c| if pred(c) { Some(c) } else { None }).collect()
-    }
-
-    fn all_near_ordered<F>(&self, cell: &'a T, pred: F) -> Vec<Option<&'a T>> where Self: Sized, F: Fn(&'a T) -> bool {
-        let nd = self.all_near(cell);
-        nd.iter().map(|&c| if pred(c) { Some(c) } else { None }).collect()
-    }
-}
-
-impl<'a> CellGraph<'a, LangtonsAnt> for AntGraph<'a> {
-    #[inline]
-    fn all_near(&self, c: &'a LangtonsAnt) -> Vec<&'a LangtonsAnt> where Self: Sized {
-        let x = c.pos.0;
-        let y = c.pos.1;
-        let last = self.grid.dim - 1;
-        let up = if y == 0 {
-            self.grid.cell(x, last)
-        } else {
-            self.grid.cell(x, y - 1)
-        };
-        let right = if x == last {
-            self.grid.cell(0, y)
-        } else {
-            self.grid.cell(x + 1, y)
-        };
-        let down = if y == last {
-            self.grid.cell(x, 0)
-        } else {
-            self.grid.cell(x, y + 1)
-        };
-        let left = if x == 0 {
-            self.grid.cell(last, y)
-        } else {
-            self.grid.cell(x - 1, y)
-        };
-
-        vec![up, right, down, left]
-    }
-}
-
-
-pub struct AntNeighborhood<'a> {
-    nd: Vec<&'a LangtonsAnt>,
-}
-
-impl<'a> AntNeighborhood<'a> {
-    pub fn new(up: &'a LangtonsAnt, right: &'a LangtonsAnt, down: &'a LangtonsAnt, left: &'a LangtonsAnt) -> AntNeighborhood<'a> {
-        AntNeighborhood { nd: vec![up, right, down, left] }
-    }
-
-    pub fn get_if<F>(&self, index: usize, pred: F) -> Option<&LangtonsAnt> where Self: Sized, F: Fn(&'a LangtonsAnt) -> bool, {
-        if index < self.nd.len() && pred(self.nd[index]) { Some(self.nd[index]) } else { None }
-    }
-}
-
-trait Neighborhood<'a, T: 'a> {
-    fn find_first<F>(&self, pred: F) -> Option<&T> where Self: Sized, F: Fn(&'a T) -> bool;
-    fn find_all<F>(&self, pred: F) -> Vec<&T> where Self: Sized, F: Fn(&'a T) -> bool;
-}
-
-impl<'a> Neighborhood<'a, LangtonsAnt> for AntNeighborhood<'a> {
-    fn find_first<F>(&self, pred: F) -> Option<&LangtonsAnt> where Self: Sized, F: Fn(&'a LangtonsAnt) -> bool {
-        self.nd.iter().find(|&c| pred(*c)).map(|&c| c)
-    }
-
-    fn find_all<F>(&self, pred: F) -> Vec<&LangtonsAnt> where Self: Sized, F: Fn(&'a LangtonsAnt) -> bool {
-        self.nd.iter().filter_map(|&c| if pred(c) { Some(c) } else { None }).collect()
+        let rf = self.vec.borrow();
+        let res: Vec<char> = rf.iter().map(|c| to_char(c)).collect();
+        (res, self.dim)
     }
 }
 
 #[test]
 fn langtons_ant() {
-    let grid = Grid::new(100);
-    let _new_grid = grid.update();
+    let mut anthill = AntHill::new(10);
+    anthill.insert_ant(5, 5);
+
+    println!("---");
+    anthill.grid.print();
+
+    for _i in 0..10 {
+        anthill.update();
+        println!("---");
+        anthill.grid.print();
+    }
 }
