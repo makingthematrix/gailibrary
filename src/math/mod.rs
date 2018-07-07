@@ -170,7 +170,8 @@ impl From<Position> for Direction {
 
 impl PartialEq for Direction {
     fn eq(&self, other: &Direction) -> bool {
-        self.0.x.approx_eq_ulps(&other.0.x, 2) && self.0.y.approx_eq_ulps(&other.0.y, 2)
+        self.0.x.approx_eq_ulps(&other.0.x, 2)
+            && self.0.y.approx_eq_ulps(&other.0.y, 2)
             && self.0.z.approx_eq_ulps(&other.0.z, 2)
     }
 }
