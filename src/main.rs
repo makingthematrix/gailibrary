@@ -9,7 +9,6 @@ extern crate quickcheck;
 extern crate spectral;
 
 extern crate flexi_logger;
-#[macro_use]
 extern crate log;
 
 #[macro_use]
@@ -29,6 +28,8 @@ pub mod ids;
 pub mod math;
 pub mod utils;
 
+pub mod langtonsant;
+
 use flexi_logger::*;
 
 fn main() {
@@ -45,5 +46,5 @@ fn main() {
         .start()
         .unwrap_or_else(|e| panic!("Logger initialization failed with {}", e));
 
-    info!("Nothing here so far");
+    langtonsant::langtons_ant();
 }

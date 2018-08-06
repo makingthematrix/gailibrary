@@ -259,12 +259,11 @@ where
     T: Clone + PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.len == other.len
-            && self
-                .iter()
-                .zip(other.iter())
-                .find(|&((key1, ref value1), (key2, ref value2))| key1 != key2 || value1 != value2)
-                .is_none()
+        self.len == other.len && self
+            .iter()
+            .zip(other.iter())
+            .find(|&((key1, ref value1), (key2, ref value2))| key1 != key2 || value1 != value2)
+            .is_none()
     }
 }
 

@@ -1,7 +1,6 @@
 [tasks.full]
 dependencies = [
     "fmt",
-    "clippy",
     "build",
     "test",
     "docs",

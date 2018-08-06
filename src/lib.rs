@@ -24,5 +24,6 @@ extern crate num_derive;
 pub mod cell;
 pub mod enums;
 pub mod ids;
+pub mod langtonsant;
 pub mod math;
 pub mod utils;
