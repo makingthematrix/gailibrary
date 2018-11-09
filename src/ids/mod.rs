@@ -6,30 +6,11 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 #[cfg(test)]
 mod ids_tests;
 
-macro_rules! reg_priv {
-    ($s:expr, $name:expr, $map:expr) => {{
-        if $s.contains($name) {
-            $map[&$name]
-        } else {
-            $s.names.insert($name);
-            let id = $s.first_free.fetch_add(1, Ordering::SeqCst);
-            $map.insert($name, id);
-            id
-        }
-    }};
-}
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub struct ValueId(usize);
 
-pub type ValueId = usize;
-pub type CellTypeId = usize;
-
-macro_rules! reg {
-    ($s:expr, $name:expr,values) => {
-        reg_priv!($s, $name, $s.values) as ValueId
-    };
-    ($s:expr, $name:expr,cell_types) => {
-        reg_priv!($s, $name, $s.cell_types) as CellTypeId
-    };
-}
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub struct CellTypeId(usize);
 
 #[derive(Debug, Default)]
 pub struct Identifiers<S>
@@ -39,7 +20,7 @@ where
     first_free: AtomicUsize,
     names: HashSet<S>,
     values: HashMap<S, ValueId>,
-    cell_types: HashMap<S, ValueId>,
+    cell_types: HashMap<S, CellTypeId>,
 }
 
 pub static NO_ID: usize = 0;
@@ -58,42 +39,46 @@ where
     }
 
     #[inline]
-    fn contains(&self, name: S) -> bool {
+    pub fn contains(&self, name: S) -> bool {
         self.names.contains(&name)
     }
 
-    #[inline]
-    fn contains_type(&self, id: usize, map: &HashMap<S, usize>) -> bool {
-        map.values().any(|&v| v == id)
-    }
-
-    #[inline]
-    fn get(&self, name: &S, map: &HashMap<S, usize>) -> Option<usize> {
-        map.get(name).cloned()
-    }
-
     pub fn reg_value(&mut self, name: S) -> ValueId {
-        reg!(self, name, values)
+        if self.contains(name) {
+            self.values[&name]
+        } else {
+            self.names.insert(name);
+            let id = ValueId(self.first_free.fetch_add(1, Ordering::SeqCst));
+            self.values.insert(name, id);
+            id
+        }
     }
 
     pub fn contains_value(&self, id: ValueId) -> bool {
-        self.contains_type(id, &self.values)
+        self.values.values().any(|&v| v == id)
     }
 
     pub fn get_value(&self, name: S) -> Option<ValueId> {
-        self.get(&name, &self.values)
+        self.values.get(&name).map(|&v| v)
     }
 
     pub fn reg_cell_type(&mut self, name: S) -> CellTypeId {
-        reg!(self, name, cell_types)
+        if self.contains(name) {
+            self.cell_types[&name]
+        } else {
+            self.names.insert(name);
+            let id = CellTypeId(self.first_free.fetch_add(1, Ordering::SeqCst));
+            self.cell_types.insert(name, id);
+            id
+        }
     }
 
     pub fn contains_cell_type(&self, id: CellTypeId) -> bool {
-        self.contains_type(id, &self.cell_types)
+        self.cell_types.values().any(|&v| v == id)
     }
 
     pub fn get_cell_type(&self, name: S) -> Option<CellTypeId> {
-        self.get(&name, &self.cell_types)
+        self.cell_types.get(&name).map(|&c| c)
     }
 
     pub fn len(&self) -> usize {

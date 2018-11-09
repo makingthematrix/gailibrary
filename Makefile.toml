@@ -2,6 +2,7 @@
 dependencies = [
     "fmt",
     "build",
+    "clippy",
     "test",
     "docs",
     "move-docs"

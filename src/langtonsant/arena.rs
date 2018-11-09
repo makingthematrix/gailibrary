@@ -33,7 +33,8 @@ impl Arena<LangtonsAnt> {
                 } else {
                     (id, cell.clone())
                 }
-            }).collect();
+            })
+            .collect();
         let umap: UMap<Rc<LangtonsAnt>> = updated.into();
         Arena(umap)
     }
