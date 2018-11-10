@@ -4,6 +4,8 @@ pub mod langtons_ant;
 pub mod neighborhood;
 pub mod visualisation;
 
+pub mod automaton_cell;
+
 use langtonsant::arena::Arena;
 use langtonsant::grid::*;
 use langtonsant::langtons_ant::LangtonsAnt;
