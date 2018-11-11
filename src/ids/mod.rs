@@ -59,7 +59,7 @@ where
     }
 
     pub fn get_value(&self, name: S) -> Option<ValueId> {
-        self.values.get(&name).map(|&v| v)
+        self.values.get(&name).cloned()
     }
 
     pub fn reg_cell_type(&mut self, name: S) -> CellTypeId {
@@ -78,7 +78,7 @@ where
     }
 
     pub fn get_cell_type(&self, name: S) -> Option<CellTypeId> {
-        self.cell_types.get(&name).map(|&c| c)
+        self.cell_types.get(&name).cloned()
     }
 
     pub fn len(&self) -> usize {

@@ -9,7 +9,7 @@ use std::rc::{Rc, Weak};
 #[derive(Clone)]
 pub struct LangtonsAnt {
     color: WhiteBlack,
-    dir: Dir2D,
+    dir: Option<Dir2D>,
     pos: (usize, usize),
     grid: Weak<Grid<LangtonsAnt>>,
 }
@@ -18,8 +18,8 @@ impl fmt::Debug for LangtonsAnt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "LangtonsAnt(color: {}, dir: {}, pos: ({}, {}))",
-            self.color, self.dir, self.pos.0, self.pos.1
+            "LangtonsAnt(color: {:?}, dir: {:?}, pos: {:?})",
+            self.color, self.dir, self.pos
         )
     }
 }
@@ -34,16 +34,16 @@ impl LangtonsAnt {
     pub fn new(x: usize, y: usize, grid: Weak<Grid<LangtonsAnt>>) -> Self {
         LangtonsAnt {
             color: WhiteBlack::White,
-            dir: Dir2D::None,
+            dir: None,
             pos: (x, y),
-            grid: grid,
+            grid,
         }
     }
 
     pub fn new_ant(x: usize, y: usize, grid: Weak<Grid<LangtonsAnt>>) -> Self {
         LangtonsAnt {
             color: WhiteBlack::White,
-            dir: Dir2D::Up,
+            dir: Some(Dir2D::Up),
             pos: (x, y),
             grid,
         }
@@ -60,7 +60,7 @@ impl LangtonsAnt {
     }
 
     #[inline]
-    pub fn dir(&self) -> Dir2D {
+    pub fn dir(&self) -> Option<Dir2D> {
         self.dir
     }
 
@@ -75,30 +75,21 @@ impl LangtonsAnt {
     }
 
     fn update_color(&self) -> WhiteBlack {
-        if self.dir == Dir2D::None {
-            self.color
-        } else {
-            self.color.toggle()
-        }
+        self.dir.map_or(self.color, |_| self.color.toggle())
     }
 
-    pub fn update_dir(&self) -> Dir2D {
-        if self.dir == Dir2D::None {
-            if let Some((.., ant_dir)) = self
-                .grid()
-                .all_near(self)
-                .find(|c, d| c.dir == d.turn_around())
-            {
-                if self.color == WhiteBlack::White {
-                    ant_dir.turn_left()
-                } else {
-                    ant_dir.turn_right()
-                }
-            } else {
-                Dir2D::None
-            }
+    pub fn update_dir(&self) -> Option<Dir2D> {
+        if let Some((.., ant_dir)) = self
+            .grid()
+            .all_near(self)
+            .find(|c, d| c.dir.map_or(false, |c_dir| c_dir == d.turn_around()))
+        {
+            Some(match self.color {
+                WhiteBlack::White => ant_dir.turn_left(),
+                WhiteBlack::Black => ant_dir.turn_right(),
+            })
         } else {
-            Dir2D::None
+            None
         }
     }
 

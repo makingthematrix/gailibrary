@@ -103,17 +103,17 @@ impl Visualisation for Grid<LangtonsAnt> {
             if let Some(ref rf) = cell {
                 if let Some(ant) = rf.upgrade() {
                     match ant.dir() {
-                        Dir2D::None => {
+                        None => {
                             if ant.color() == WhiteBlack::White {
                                 '_'
                             } else {
                                 'X'
                             }
                         }
-                        Dir2D::Up => '<',
-                        Dir2D::Right => 'v',
-                        Dir2D::Down => '>',
-                        Dir2D::Left => '^',
+                        Some(Dir2D::Up) => '<',
+                        Some(Dir2D::Right) => 'v',
+                        Some(Dir2D::Down) => '>',
+                        Some(Dir2D::Left) => '^',
                     }
                 } else {
                     '_'

@@ -274,7 +274,6 @@ impl Sum<Coeff> for Coeff {
     }
 }
 
-#[allow(suspicious_arithmetic_impl)]
 impl Add<Coeff> for Coeff {
     type Output = Coeff;
 
@@ -288,7 +287,6 @@ impl Add<Coeff> for Coeff {
     }
 }
 
-#[allow(suspicious_arithmetic_impl)]
 impl Sub<Coeff> for Coeff {
     type Output = Coeff;
 

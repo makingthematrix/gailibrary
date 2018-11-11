@@ -1,15 +1,14 @@
 use std::cmp;
+use std::fmt;
 use std::vec::Vec;
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub struct Pos2D {
     x: usize,
     y: usize,
 }
 
-lazy_static! {
-    static ref ZERO: Pos2D = Pos2D { x: 0, y: 0 };
-}
+const ZERO: Pos2D = Pos2D { x: 0, y: 0 };
 
 impl Pos2D {
     pub fn new(x: usize, y: usize) -> Pos2D {
@@ -17,7 +16,7 @@ impl Pos2D {
     }
 
     pub fn from_dim(dim: usize) -> Vec<Pos2D> {
-        Pos2D::from_range(*ZERO, Pos2D::new(dim, dim))
+        Pos2D::from_range(ZERO, Pos2D::new(dim, dim))
     }
 
     pub fn from_range(p1: Pos2D, p2: Pos2D) -> Vec<Pos2D> {
@@ -34,5 +33,12 @@ impl Pos2D {
         }
 
         v
+    }
+}
+
+impl fmt::Display for Pos2D {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Customize so only `x` and `y` are denoted.
+        write!(f, "Pos2D({}, {})", self.x, self.y)
     }
 }

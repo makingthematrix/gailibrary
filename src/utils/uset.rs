@@ -228,7 +228,7 @@ impl USet {
             USet::new()
         } else {
             let min = mn.unwrap();
-            let mx = (0..(total_len - min + 1))
+            let mx = (0..=(total_len - min))
                 .find(|&i| self.contains(total_len - i) && other.contains(total_len - i));
             let max = total_len - mx.unwrap();
             debug_assert!(max >= min);

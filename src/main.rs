@@ -5,7 +5,6 @@
 #[macro_use]
 extern crate quickcheck;
 #[cfg(test)]
-#[macro_use]
 extern crate spectral;
 
 extern crate flexi_logger;
@@ -21,7 +20,6 @@ extern crate time;
 extern crate num;
 #[macro_use]
 extern crate num_derive;
-
 #[macro_use]
 extern crate lazy_static;
 
