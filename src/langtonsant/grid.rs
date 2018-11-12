@@ -4,6 +4,7 @@ use langtonsant::neighborhood::Neighborhood;
 use langtonsant::visualisation::Visualisation;
 
 use enums::dir_2d::Dir2D;
+use enums::pos_2d::Pos2D;
 use enums::white_black::WhiteBlack;
 use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
@@ -14,6 +15,17 @@ pub struct Grid<T> {
 }
 
 impl Grid<LangtonsAnt> {
+    pub fn id(&self, pos: &Pos2D) -> usize {
+        fn wrap(i: i64, dim: usize) -> usize {
+            match i % dim as i64 {
+                x if x >= 0 => x as usize,
+                x => (x + dim as i64) as usize,
+            }
+        }
+
+        wrap(pos.x, self.dim) * self.dim + wrap(pos.y, self.dim)
+    }
+
     pub fn new(dim: usize) -> Self {
         Grid {
             vec: RefCell::new(vec![None; dim * dim]),
@@ -32,13 +44,15 @@ impl Grid<LangtonsAnt> {
     pub fn update(&self, arena: &Arena<LangtonsAnt>) {
         let mut ref_mut = self.vec.borrow_mut();
         arena.for_each(|cell| {
-            ref_mut[cell.x() * self.dim + cell.y()] = Some(Rc::downgrade(cell));
+            ref_mut[self.id(&cell.pos)] = Some(Rc::downgrade(cell));
         });
     }
 
-    pub fn insert(&self, x: usize, y: usize, cell: Weak<LangtonsAnt>) {
+    pub fn insert(&self, pos: &Pos2D, cell: Weak<LangtonsAnt>) -> usize {
         let mut ref_mut = self.vec.borrow_mut();
-        ref_mut[x * self.dim + y] = Some(cell);
+        let id = self.id(pos);
+        ref_mut[id] = Some(cell);
+        id
     }
 
     pub fn exists<F>(&self, index: usize, pred: F) -> bool
@@ -62,36 +76,25 @@ impl Grid<LangtonsAnt> {
     }
 
     #[inline]
-    pub fn get(&self, x: usize, y: usize) -> Option<Weak<LangtonsAnt>> {
+    pub fn get(&self, pos: &Pos2D) -> Option<Weak<LangtonsAnt>> {
         let rf = self.vec.borrow();
-        rf[x * self.dim + y].clone()
-    }
-
-    #[inline]
-    fn get_with_offset(&self, x: usize, offx: i64, y: usize, offy: i64) -> Weak<LangtonsAnt> {
-        let xi: usize = if x == 0 && offx == -1 {
-            self.dim - 1
-        } else if x == self.dim - 1 && offx == 1 {
-            0
-        } else {
-            (x as i64 + offx) as usize
-        };
-        let yi: usize = if y == 0 && offy == -1 {
-            self.dim - 1
-        } else if y == self.dim - 1 && offy == 1 {
-            0
-        } else {
-            (y as i64 + offy) as usize
-        };
-        let rf = self.vec.borrow();
-        rf[xi * self.dim + yi].clone().unwrap()
+        rf[self.id(pos)].clone()
     }
 
     pub fn all_near(&self, cell: &LangtonsAnt) -> Neighborhood<LangtonsAnt> {
-        let u = self.get_with_offset(cell.x(), 0, cell.y(), -1);
-        let r = self.get_with_offset(cell.x(), 1, cell.y(), 0);
-        let d = self.get_with_offset(cell.x(), 0, cell.y(), 1);
-        let l = self.get_with_offset(cell.x(), -1, cell.y(), 0);
+        let u = self.get(&cell.pos.move_by_one(Dir2D::Up)).unwrap().clone();
+        let r = self
+            .get(&cell.pos.move_by_one(Dir2D::Right))
+            .unwrap()
+            .clone();
+        let d = self
+            .get(&cell.pos.move_by_one(Dir2D::Down))
+            .unwrap()
+            .clone();
+        let l = self
+            .get(&cell.pos.move_by_one(Dir2D::Left))
+            .unwrap()
+            .clone();
 
         Neighborhood::new(u, r, d, l)
     }
@@ -102,9 +105,9 @@ impl Visualisation for Grid<LangtonsAnt> {
         fn to_char(cell: &Option<Weak<LangtonsAnt>>) -> char {
             if let Some(ref rf) = cell {
                 if let Some(ant) = rf.upgrade() {
-                    match ant.dir() {
+                    match ant.dir {
                         None => {
-                            if ant.color() == WhiteBlack::White {
+                            if ant.color == WhiteBlack::White {
                                 '_'
                             } else {
                                 'X'

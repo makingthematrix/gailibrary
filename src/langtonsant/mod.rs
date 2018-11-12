@@ -6,6 +6,7 @@ pub mod visualisation;
 
 pub mod automaton_cell;
 
+use enums::pos_2d::Pos2D;
 use langtonsant::arena::Arena;
 use langtonsant::grid::*;
 use langtonsant::langtons_ant::LangtonsAnt;
@@ -34,18 +35,17 @@ impl AntHill {
         self.arena = arena;
     }
 
-    pub fn insert_ant(&mut self, x: usize, y: usize) {
-        let ant = Rc::new(LangtonsAnt::new_ant(x, y, Rc::downgrade(&self.grid)));
+    pub fn insert_ant(&mut self, pos: &Pos2D) {
+        let ant = Rc::new(LangtonsAnt::new_ant(pos, Rc::downgrade(&self.grid)));
 
-        self.grid.insert(x, y, Rc::downgrade(&ant));
-        let id = x * self.grid.dim() + y;
+        let id = self.grid.insert(pos, Rc::downgrade(&ant));
         self.arena = self.arena.insert(id, &ant);
     }
 }
 
 pub fn langtons_ant() {
     let mut anthill = AntHill::new(20);
-    anthill.insert_ant(10, 10);
+    anthill.insert_ant(&Pos2D::new(10, 10));
 
     println!("---");
     anthill.grid.print();

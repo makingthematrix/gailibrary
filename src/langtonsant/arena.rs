@@ -2,6 +2,7 @@ use langtonsant::grid::Grid;
 use langtonsant::langtons_ant::LangtonsAnt;
 use std::rc::{Rc, Weak};
 
+use enums::pos_2d::Pos2D;
 use utils::umap::UMap;
 
 pub struct Arena<T>(UMap<Rc<T>>);
@@ -13,14 +14,13 @@ impl Arena<LangtonsAnt> {
 
     pub fn init(&mut self, grid: &Rc<Grid<LangtonsAnt>>) {
         let dim = grid.dim();
-        for i in 0..dim {
-            for j in 0..dim {
-                self.0.put(
-                    i * dim + j,
-                    Rc::new(LangtonsAnt::new(i, j, Rc::downgrade(grid))),
-                );
-            }
-        }
+
+        Pos2D::from_dim(dim).iter().for_each(|pos| {
+            self.0.put(
+                grid.id(pos),
+                Rc::new(LangtonsAnt::new(*pos, Rc::downgrade(grid))),
+            );
+        });
     }
 
     pub fn insert(&self, id: usize, cell: &Rc<LangtonsAnt>) -> Self {

@@ -22,6 +22,7 @@ extern crate num;
 extern crate num_derive;
 #[macro_use]
 extern crate lazy_static;
+extern crate gailibrary;
 
 pub mod cell;
 pub mod enums;

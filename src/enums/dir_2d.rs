@@ -51,4 +51,22 @@ impl Dir2D {
             Dir2D::Left => Dir2D::Right,
         }
     }
+
+    pub fn approx4(x: f64, y: f64) -> Dir2D {
+        if x > 0.0 {
+            if y > x {
+                Dir2D::Down
+            } else if y < -x {
+                Dir2D::Up
+            } else {
+                Dir2D::Right
+            }
+        } else if y < x {
+            Dir2D::Up
+        } else if y > -x {
+            Dir2D::Down
+        } else {
+            Dir2D::Left
+        }
+    }
 }

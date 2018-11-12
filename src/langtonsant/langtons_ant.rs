@@ -1,4 +1,5 @@
 use enums::dir_2d::*;
+use enums::pos_2d::*;
 use enums::white_black::*;
 
 use langtonsant::grid::Grid;
@@ -8,9 +9,9 @@ use std::rc::{Rc, Weak};
 
 #[derive(Clone)]
 pub struct LangtonsAnt {
-    color: WhiteBlack,
-    dir: Option<Dir2D>,
-    pos: (usize, usize),
+    pub color: WhiteBlack,
+    pub dir: Option<Dir2D>,
+    pub pos: Pos2D,
     grid: Weak<Grid<LangtonsAnt>>,
 }
 
@@ -26,47 +27,27 @@ impl fmt::Debug for LangtonsAnt {
 
 impl PartialEq for LangtonsAnt {
     fn eq(&self, other: &LangtonsAnt) -> bool {
-        self.pos.0 == other.pos.0 && self.pos.1 == other.pos.1
+        self.pos == other.pos
     }
 }
 
 impl LangtonsAnt {
-    pub fn new(x: usize, y: usize, grid: Weak<Grid<LangtonsAnt>>) -> Self {
+    pub fn new(pos: Pos2D, grid: Weak<Grid<LangtonsAnt>>) -> Self {
         LangtonsAnt {
             color: WhiteBlack::White,
             dir: None,
-            pos: (x, y),
+            pos,
             grid,
         }
     }
 
-    pub fn new_ant(x: usize, y: usize, grid: Weak<Grid<LangtonsAnt>>) -> Self {
+    pub fn new_ant(pos: &Pos2D, grid: Weak<Grid<LangtonsAnt>>) -> Self {
         LangtonsAnt {
             color: WhiteBlack::White,
             dir: Some(Dir2D::Up),
-            pos: (x, y),
+            pos: *pos,
             grid,
         }
-    }
-
-    #[inline]
-    pub fn x(&self) -> usize {
-        self.pos.0
-    }
-
-    #[inline]
-    pub fn y(&self) -> usize {
-        self.pos.1
-    }
-
-    #[inline]
-    pub fn dir(&self) -> Option<Dir2D> {
-        self.dir
-    }
-
-    #[inline]
-    pub fn color(&self) -> WhiteBlack {
-        self.color
     }
 
     #[inline]
@@ -97,7 +78,7 @@ impl LangtonsAnt {
         LangtonsAnt {
             color: self.update_color(),
             dir: self.update_dir(),
-            pos: (self.pos.0, self.pos.1),
+            pos: self.pos,
             grid: self.grid.clone(),
         }
     }
