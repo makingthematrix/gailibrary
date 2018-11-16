@@ -24,6 +24,7 @@ extern crate lazy_static;
 extern crate gailibrary;
 
 pub mod cell;
+pub mod engine;
 pub mod enums;
 pub mod ids;
 pub mod math;
@@ -47,5 +48,5 @@ fn main() {
         .start()
         .unwrap_or_else(|e| panic!("Logger initialization failed with {}", e));
 
-    langtonsant::langtons_ant();
+    langtonsant::langtons_ant2();
 }

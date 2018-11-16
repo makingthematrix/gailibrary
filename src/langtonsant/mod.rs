@@ -1,15 +1,13 @@
-pub mod arena;
-pub mod grid;
 pub mod langtons_ant;
-pub mod neighborhood;
+pub mod lant;
 pub mod visualisation;
 
-pub mod automaton_cell;
-
+use engine::arena::Arena;
+use engine::automaton::Automaton;
+use engine::grid::*;
 use enums::pos_2d::Pos2D;
-use langtonsant::arena::Arena;
-use langtonsant::grid::*;
 use langtonsant::langtons_ant::LangtonsAnt;
+use langtonsant::lant::LAnt;
 use langtonsant::visualisation::Visualisation;
 use std::rc::Rc;
 
@@ -54,5 +52,20 @@ pub fn langtons_ant() {
         anthill.update();
         println!("---");
         anthill.grid.print();
+    }
+}
+
+pub fn langtons_ant2() {
+    let mut auto = Automaton::<LAnt>::new(20);
+    let ant_pos = Pos2D::new(10, 10);
+    auto.change(|board| board.change_one(&ant_pos, |_| LAnt::new_ant(&ant_pos)));
+
+    println!("---");
+    auto.0.print();
+
+    for _i in 0..100 {
+        auto.update();
+        println!("---");
+        auto.0.print();
     }
 }
