@@ -1,6 +1,3 @@
-#![feature(test)]
-#![feature(const_fn)]
-
 extern crate gailibrary;
 
 use gailibrary::langtonsant;

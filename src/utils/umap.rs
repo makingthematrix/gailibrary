@@ -166,11 +166,12 @@ where
     #[inline]
     fn debug_compare(self: &Self, other: &UMap<T>) {
         // don't perform operation on maps if they have different elements at the same places - clearly something's messed up
-        debug_assert!(self
-            .iter()
-            .zip(other.iter())
-            .find(|&((i1, ref v1), (i2, ref v2))| i1 == i2 && v1 != v2)
-            .is_none());
+        debug_assert!(
+            self.iter()
+                .zip(other.iter())
+                .find(|&((i1, ref v1), (i2, ref v2))| i1 == i2 && v1 != v2)
+                .is_none()
+        );
     }
 
     // TODO: think about the naming: verbs or nouns? `substract` is not symmetric, is that important?
@@ -258,12 +259,11 @@ where
     T: Clone + PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.len == other.len
-            && self
-                .iter()
-                .zip(other.iter())
-                .find(|&((key1, ref value1), (key2, ref value2))| key1 != key2 || value1 != value2)
-                .is_none()
+        self.len == other.len && self
+            .iter()
+            .zip(other.iter())
+            .find(|&((key1, ref value1), (key2, ref value2))| key1 != key2 || value1 != value2)
+            .is_none()
     }
 }
 

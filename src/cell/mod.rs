@@ -168,10 +168,3 @@ impl<T> ValueId<T> {
         }
     }
 }
-
-pub const fn new_id<T>(id: usize) -> ValueId<T> {
-    ValueId::<T> {
-        id,
-        _marker: PhantomData,
-    }
-}

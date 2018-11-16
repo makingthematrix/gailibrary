@@ -1,5 +1,4 @@
 #![allow(unknown_lints)]
-#![feature(const_fn)]
 
 #[cfg(test)]
 #[macro_use]
