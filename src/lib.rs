@@ -22,6 +22,7 @@ extern crate num_derive;
 extern crate lazy_static;
 
 pub mod cell;
+pub mod engine;
 pub mod enums;
 pub mod ids;
 pub mod langtonsant;

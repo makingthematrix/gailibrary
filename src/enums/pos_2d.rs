@@ -38,9 +38,9 @@ impl Pos2D {
 
     pub fn move_by_one(&self, dir: Dir2D) -> Pos2D {
         match dir {
-            Dir2D::Up => Pos2D::new(self.x, self.y + 1),
+            Dir2D::Up => Pos2D::new(self.x, self.y - 1),
             Dir2D::Right => Pos2D::new(self.x + 1, self.y),
-            Dir2D::Down => Pos2D::new(self.x, self.y - 1),
+            Dir2D::Down => Pos2D::new(self.x, self.y + 1),
             Dir2D::Left => Pos2D::new(self.x - 1, self.y),
         }
     }
