@@ -1,3 +1,165 @@
+use num;
+use std::cmp;
+use std::fmt;
+use std::vec::Vec;
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+pub struct Pos2D {
+    pub x: i64,
+    pub y: i64,
+}
+
+const POS2D_ZERO: Pos2D = Pos2D { x: 0, y: 0 };
+
+impl Pos2D {
+    pub fn new(x: i64, y: i64) -> Pos2D {
+        Pos2D { x, y }
+    }
+
+    pub fn from_dim(dim: usize) -> Vec<Pos2D> {
+        Pos2D::from_range(POS2D_ZERO, Pos2D::new(dim as i64, dim as i64))
+    }
+
+    pub fn from_range(p1: Pos2D, p2: Pos2D) -> Vec<Pos2D> {
+        let xfrom = cmp::min(p1.x, p2.x);
+        let yfrom = cmp::min(p1.y, p2.y);
+        let xto = cmp::max(p1.x, p2.x);
+        let yto = cmp::max(p1.y, p2.y);
+
+        let mut v = Vec::with_capacity(((xto - xfrom) * (yto - yfrom)) as usize);
+        for x in xfrom..xto {
+            for y in yfrom..yto {
+                v.push(Pos2D::new(x, y))
+            }
+        }
+
+        v
+    }
+
+    pub fn move_by_one(&self, dir: Dir2D) -> Pos2D {
+        match dir {
+            Dir2D::Up => Pos2D::new(self.x, self.y - 1),
+            Dir2D::Right => Pos2D::new(self.x + 1, self.y),
+            Dir2D::Down => Pos2D::new(self.x, self.y + 1),
+            Dir2D::Left => Pos2D::new(self.x - 1, self.y),
+        }
+    }
+
+    pub fn dir_to(&self, pos: Pos2D) -> Dir2D {
+        Dir2D::approx4(pos.x as f64 - self.x as f64, pos.y as f64 - self.y as f64)
+    }
+}
+
+impl fmt::Display for Pos2D {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Customize so only `x` and `y` are denoted.
+        write!(f, "Pos2D({}, {})", self.x, self.y)
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub enum Dir2D {
+    Up,
+    Right,
+    Down,
+    Left,
+}
+
+impl fmt::Display for Dir2D {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let dir = match *self {
+            Dir2D::Up => "Up",
+            Dir2D::Right => "Right",
+            Dir2D::Down => "Down",
+            Dir2D::Left => "Left",
+        };
+        write!(f, "Dir2D({})", dir)
+    }
+}
+
+lazy_static! {
+    pub static ref dirs4: [Dir2D; 4] = [Dir2D::Up, Dir2D::Right, Dir2D::Down, Dir2D::Left];
+}
+
+impl Dir2D {
+    pub fn turn_right(self) -> Dir2D {
+        match self {
+            Dir2D::Up => Dir2D::Right,
+            Dir2D::Right => Dir2D::Down,
+            Dir2D::Down => Dir2D::Left,
+            Dir2D::Left => Dir2D::Up,
+        }
+    }
+
+    pub fn turn_left(self) -> Dir2D {
+        match self {
+            Dir2D::Up => Dir2D::Left,
+            Dir2D::Right => Dir2D::Up,
+            Dir2D::Down => Dir2D::Right,
+            Dir2D::Left => Dir2D::Down,
+        }
+    }
+
+    pub fn turn_around(self) -> Dir2D {
+        match self {
+            Dir2D::Up => Dir2D::Down,
+            Dir2D::Right => Dir2D::Left,
+            Dir2D::Down => Dir2D::Up,
+            Dir2D::Left => Dir2D::Right,
+        }
+    }
+
+    pub fn approx4(x: f64, y: f64) -> Dir2D {
+        if x > 0.0 {
+            if y > x {
+                Dir2D::Down
+            } else if y < -x {
+                Dir2D::Up
+            } else {
+                Dir2D::Right
+            }
+        } else if y < x {
+            Dir2D::Up
+        } else if y > -x {
+            Dir2D::Down
+        } else {
+            Dir2D::Left
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, FromPrimitive)]
+pub enum WhiteBlack {
+    White = 0,
+    Black,
+}
+
+impl fmt::Display for WhiteBlack {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let color = match *self {
+            WhiteBlack::White => "White",
+            WhiteBlack::Black => "Black",
+        };
+        write!(f, "WhiteBlack({})", color)
+    }
+}
+
+impl From<usize> for WhiteBlack {
+    fn from(c: usize) -> Self {
+        num::FromPrimitive::from_usize(c).unwrap()
+    }
+}
+
+impl WhiteBlack {
+    pub fn toggle(self) -> WhiteBlack {
+        if self == WhiteBlack::White {
+            WhiteBlack::Black
+        } else {
+            WhiteBlack::White
+        }
+    }
+}
+
 use cgmath::prelude::*;
 use cgmath::{Deg, Point3, Rad, Vector3};
 

@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod cell_tests {
     use cell::*;
-    use math::*;
+    use fields::*;
     use spectral::prelude::*;
 
     #[test]

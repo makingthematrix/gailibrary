@@ -1,42 +1,39 @@
-use enums::dir_2d::*;
-use enums::pos_2d::*;
-use enums::white_black::*;
+use fields::{Dir2D, Pos2D, WhiteBlack};
 
-use engine::grid::Grid;
+use engine::rc_automaton::*;
 
-use engine::arena::ArenaCell;
-use engine::neighborhood::Neighborhood;
 use langtonsant::visualisation::Visualisation;
+
 use std::fmt;
 use std::rc::{Rc, Weak};
 
 #[derive(Clone)]
-pub struct LangtonsAnt {
+pub struct RcLangtonsAnt {
     pub color: WhiteBlack,
     pub dir: Option<Dir2D>,
     pub pos: Pos2D,
-    grid: Weak<Grid<LangtonsAnt>>,
+    grid: Weak<RcGrid<RcLangtonsAnt>>,
 }
 
-impl fmt::Debug for LangtonsAnt {
+impl fmt::Debug for RcLangtonsAnt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "LangtonsAnt(color: {:?}, dir: {:?}, pos: {:?})",
+            "RcLangtonsAnt(color: {:?}, dir: {:?}, pos: {:?})",
             self.color, self.dir, self.pos
         )
     }
 }
 
-impl PartialEq for LangtonsAnt {
-    fn eq(&self, other: &LangtonsAnt) -> bool {
+impl PartialEq for RcLangtonsAnt {
+    fn eq(&self, other: &RcLangtonsAnt) -> bool {
         self.pos == other.pos
     }
 }
 
-impl LangtonsAnt {
-    pub fn new_ant(pos: &Pos2D, grid: Weak<Grid<LangtonsAnt>>) -> Self {
-        LangtonsAnt {
+impl RcLangtonsAnt {
+    pub fn new_ant(pos: &Pos2D, grid: Weak<RcGrid<RcLangtonsAnt>>) -> Self {
+        RcLangtonsAnt {
             color: WhiteBlack::White,
             dir: Some(Dir2D::Up),
             pos: *pos,
@@ -45,7 +42,7 @@ impl LangtonsAnt {
     }
 
     #[inline]
-    fn grid(&self) -> Rc<Grid<LangtonsAnt>> {
+    fn grid(&self) -> Rc<RcGrid<RcLangtonsAnt>> {
         self.grid.upgrade().unwrap()
     }
 
@@ -69,9 +66,9 @@ impl LangtonsAnt {
     }
 }
 
-impl ArenaCell for LangtonsAnt {
-    fn new(pos: Pos2D, grid: Weak<Grid<LangtonsAnt>>) -> Self {
-        LangtonsAnt {
+impl RcAutomatonCell for RcLangtonsAnt {
+    fn new(pos: Pos2D, grid: Weak<RcGrid<Self>>) -> Self {
+        RcLangtonsAnt {
             color: WhiteBlack::White,
             dir: None,
             pos,
@@ -80,7 +77,7 @@ impl ArenaCell for LangtonsAnt {
     }
 
     fn update(&self) -> Self {
-        LangtonsAnt {
+        RcLangtonsAnt {
             color: self.update_color(),
             dir: self.update_dir(),
             pos: self.pos,
@@ -93,9 +90,9 @@ impl ArenaCell for LangtonsAnt {
     }
 }
 
-impl Visualisation for Grid<LangtonsAnt> {
+impl Visualisation for RcGrid<RcLangtonsAnt> {
     fn grid(&self) -> (Vec<char>, usize) {
-        fn to_char(cell: &Option<Weak<LangtonsAnt>>) -> char {
+        fn to_char(cell: &Option<Weak<RcLangtonsAnt>>) -> char {
             if let Some(ref rf) = cell {
                 if let Some(ant) = rf.upgrade() {
                     match ant.dir {
@@ -125,7 +122,7 @@ impl Visualisation for Grid<LangtonsAnt> {
     }
 }
 
-impl fmt::Debug for Neighborhood<LangtonsAnt> {
+impl fmt::Debug for RcNeighborhood<RcLangtonsAnt> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let vec = &self.0;
         let up = vec[0].upgrade().unwrap();
@@ -135,7 +132,7 @@ impl fmt::Debug for Neighborhood<LangtonsAnt> {
 
         write!(
             f,
-            "Neighborhood<LangtonsAnt>(\nUP   : {:?},\nRIGHT: {:?},\nDOWN : {:?},\nLEFT : {:?})",
+            "RcNeighborhood<RcLangtonsAnt>(\nUP   : {:?},\nRIGHT: {:?},\nDOWN : {:?},\nLEFT : {:?})",
             up, right, down, left
         )
     }

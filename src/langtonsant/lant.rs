@@ -1,7 +1,7 @@
-use engine::automaton_cell::AutomatonCell;
-use engine::board::{Board, Neigh};
-use enums::dir_2d::Dir2D;
-use enums::pos_2d::Pos2D;
+use engine::automaton::*;
+
+use fields::{Dir2D, Pos2D};
+
 use langtonsant::visualisation::Visualisation;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -28,7 +28,7 @@ impl LAnt {
         }
     }
 
-    fn update_dir(&self, neighborhood: &Neigh<Self>) -> Option<Dir2D> {
+    fn update_dir(&self, neighborhood: &Neighborhood<Self>) -> Option<Dir2D> {
         if let Some((ref ant_dir, ..)) = neighborhood
             .neumann(&self.pos)
             .iter()
@@ -46,7 +46,7 @@ impl LAnt {
 }
 
 impl AutomatonCell for LAnt {
-    fn update(&self, neighborhood: &Neigh<Self>) -> Self {
+    fn update(&self, neighborhood: &Neighborhood<Self>) -> Self {
         LAnt {
             color: self.update_color(),
             dir: self.update_dir(neighborhood),

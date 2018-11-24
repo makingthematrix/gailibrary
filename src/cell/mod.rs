@@ -1,4 +1,4 @@
-use math;
+use fields;
 use time;
 
 use cgmath::Vector3;
@@ -11,9 +11,9 @@ mod cell_tests;
 pub enum Value {
     Int(i64),
     Float(f64),
-    Position(math::Position),
-    Direction(math::Direction),
-    Coeff(math::Coeff),
+    Position(fields::Position),
+    Direction(fields::Direction),
+    Coeff(fields::Coeff),
     Time(time::SteadyTime),
     Duration(time::Duration),
 }

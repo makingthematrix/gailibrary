@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod math_tests {
+mod tests {
 
     use math::*;
     use std::ptr::eq;
