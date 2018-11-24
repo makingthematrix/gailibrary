@@ -57,8 +57,8 @@ impl RcLangtonsAnt {
             .find(|c, d| c.dir.map_or(false, |c_dir| c_dir == d.turn_around()))
         {
             Some(match self.color {
-                WhiteBlack::White => ant_dir.turn_left(),
-                WhiteBlack::Black => ant_dir.turn_right(),
+                WhiteBlack::White => ant_dir.turn_right(),
+                WhiteBlack::Black => ant_dir.turn_left(),
             })
         } else {
             None

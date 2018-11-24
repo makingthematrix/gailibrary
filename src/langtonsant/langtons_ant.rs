@@ -5,15 +5,15 @@ use fields::{Dir2D, Pos2D};
 use langtonsant::visualisation::Visualisation;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct LAnt {
+pub struct LangtonsAnt {
     pub color: bool,
     pub dir: Option<Dir2D>,
     pub pos: Pos2D,
 }
 
-impl LAnt {
+impl LangtonsAnt {
     pub fn new_ant(pos: &Pos2D) -> Self {
-        LAnt {
+        LangtonsAnt {
             color: true,
             dir: Some(Dir2D::Up),
             pos: *pos,
@@ -45,9 +45,9 @@ impl LAnt {
     }
 }
 
-impl AutomatonCell for LAnt {
+impl AutomatonCell for LangtonsAnt {
     fn update(&self, neighborhood: &Neighborhood<Self>) -> Self {
-        LAnt {
+        LangtonsAnt {
             color: self.update_color(),
             dir: self.update_dir(neighborhood),
             pos: self.pos,
@@ -55,7 +55,7 @@ impl AutomatonCell for LAnt {
     }
 
     fn new(pos: &Pos2D) -> Self {
-        LAnt {
+        LangtonsAnt {
             color: false,
             dir: None,
             pos: *pos,
@@ -63,9 +63,9 @@ impl AutomatonCell for LAnt {
     }
 }
 
-impl Visualisation for Board<LAnt> {
+impl Visualisation for Board<LangtonsAnt> {
     fn grid(&self) -> (Vec<char>, usize) {
-        fn to_char(cell: &LAnt) -> char {
+        fn to_char(cell: &LangtonsAnt) -> char {
             match cell.dir {
                 None => {
                     if cell.color {
