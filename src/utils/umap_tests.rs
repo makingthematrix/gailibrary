@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod umap_tests {
-    use utils::umap::*;
+    use crate::utils::umap::*;
 
     // use quickcheck::TestResult;
     use spectral::prelude::*;

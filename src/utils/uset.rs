@@ -321,7 +321,7 @@ impl Into<Vec<usize>> for USet {
     }
 }
 
-use utils::umap::UMap;
+use crate::utils::umap::UMap;
 
 impl<T> From<UMap<T>> for USet
 where

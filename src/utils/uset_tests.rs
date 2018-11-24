@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod uset_tests {
-    use utils::uset::*;
+    use crate::utils::uset::*;
 
     use std::collections::HashSet;
 

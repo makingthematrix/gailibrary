@@ -1,6 +1,4 @@
-extern crate rand;
-
-use self::rand::{Rng, SeedableRng, XorShiftRng};
+use rand::{Rng, SeedableRng, XorShiftRng};
 use std;
 
 #[derive(Debug, Clone)]
