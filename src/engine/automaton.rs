@@ -1,7 +1,7 @@
-use fields::{dirs4, Dir2D, Pos2D};
+use crate::fields::{dirs4, Dir2D, Pos2D};
+use crate::utils::umap::UMap;
 
 use std::collections::HashMap;
-use utils::umap::UMap;
 
 pub trait AutomatonCell: Clone + Copy + PartialEq {
     fn update(&self, neighborhood: &Neighborhood<Self>) -> Self;

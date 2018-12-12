@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod ids_tests {
-    use ids::*;
+    use crate::ids::*;
     use spectral::prelude::*;
 
     #[test]

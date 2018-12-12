@@ -3,9 +3,6 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-#[cfg(test)]
-mod ids_tests;
-
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct ValueId(usize);
 
@@ -18,9 +15,9 @@ where
     S: AsRef<str> + Eq + Hash + Copy + Debug,
 {
     first_free: AtomicUsize,
-    names: HashSet<S>,
-    values: HashMap<S, ValueId>,
-    cell_types: HashMap<S, CellTypeId>,
+    pub names: HashSet<S>,
+    pub values: HashMap<S, ValueId>,
+    pub cell_types: HashMap<S, CellTypeId>,
 }
 
 pub static NO_ID: usize = 0;

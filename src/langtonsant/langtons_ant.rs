@@ -1,8 +1,6 @@
-use engine::automaton::*;
-
-use fields::{Dir2D, Pos2D};
-
-use langtonsant::visualisation::Visualisation;
+use crate::engine::automaton::*;
+use crate::fields::{Dir2D, Pos2D};
+use crate::langtonsant::visualisation::Visualisation;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct LangtonsAnt {

@@ -1,8 +1,6 @@
-use fields::{Dir2D, Pos2D, WhiteBlack};
-
-use engine::rc_automaton::*;
-
-use langtonsant::visualisation::Visualisation;
+use crate::engine::rc_automaton::*;
+use crate::fields::{Dir2D, Pos2D, WhiteBlack};
+use crate::langtonsant::visualisation::Visualisation;
 
 use std::fmt;
 use std::rc::{Rc, Weak};

@@ -1,12 +1,8 @@
 #[cfg(test)]
 mod prng_tests {
-    extern crate rand;
-
-    use utils::prng::*;
-
+    use crate::utils::prng::*;
+    use rand::Rng;
     use spectral::prelude::*;
-
-    use self::rand::Rng;
 
     #[test]
     fn create_rng() {

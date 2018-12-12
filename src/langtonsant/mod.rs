@@ -4,13 +4,12 @@ pub mod visualisation;
 
 use std::rc::Rc;
 
-use engine::automaton::Automaton;
-use engine::rc_automaton::RcAutomaton;
-use fields::Pos2D;
-
-use langtonsant::langtons_ant::LangtonsAnt;
-use langtonsant::rc_langtons_ant::RcLangtonsAnt;
-use langtonsant::visualisation::Visualisation;
+use crate::engine::automaton::Automaton;
+use crate::engine::rc_automaton::RcAutomaton;
+use crate::fields::Pos2D;
+use crate::langtonsant::langtons_ant::LangtonsAnt;
+use crate::langtonsant::rc_langtons_ant::RcLangtonsAnt;
+use crate::langtonsant::visualisation::Visualisation;
 
 pub fn langtons_ant(dim: usize, steps: usize) {
     let mut auto = Automaton::<LangtonsAnt>::new(dim);

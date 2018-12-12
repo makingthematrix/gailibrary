@@ -1,9 +1,8 @@
 use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
 
-use utils::umap::UMap;
-
-use fields::{dirs4, Dir2D, Pos2D};
+use crate::fields::{dirs4, Dir2D, Pos2D};
+use crate::utils::umap::UMap;
 
 pub trait RcAutomatonCell: Clone + PartialEq {
     fn new(pos: Pos2D, grid: Weak<RcGrid<Self>>) -> Self;
