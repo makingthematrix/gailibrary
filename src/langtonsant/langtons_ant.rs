@@ -33,9 +33,9 @@ impl LangtonsAnt {
             .find(|&(d, &c)| c.dir.map_or(false, |c_dir| c_dir == d.turn_around()))
         {
             Some(if self.color {
-                ant_dir.turn_left()
-            } else {
                 ant_dir.turn_right()
+            } else {
+                ant_dir.turn_left()
             })
         } else {
             None

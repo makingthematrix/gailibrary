@@ -13,8 +13,8 @@ extern crate lazy_static;
 pub mod engine;
 pub mod fields;
 pub mod ids;
-pub mod utils;
 pub mod langtonsant;
+pub mod utils;
 
 #[cfg(test)]
 mod fields_tests;

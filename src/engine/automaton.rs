@@ -93,12 +93,17 @@ impl<C: AutomatonCell> Automaton<C> {
         Automaton(Board::<C>::new(dim))
     }
 
-    pub fn update(&mut self) {
+    pub fn next(&mut self) {
         self.0 = self.0.update();
     }
 
     pub fn change(&mut self, f: impl Fn(&Board<C>) -> Board<C>) {
         self.0 = f(&self.0);
+    }
+
+    #[inline]
+    pub fn dim(&self) -> usize {
+        self.0.dim
     }
 }
 

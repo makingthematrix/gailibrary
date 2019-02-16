@@ -20,7 +20,7 @@ pub fn langtons_ant(dim: usize, steps: usize) {
     auto.0.print();
 
     for _i in 0..steps {
-        auto.update();
+        auto.next();
         println!("---");
         auto.0.print();
     }
