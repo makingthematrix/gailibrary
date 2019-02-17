@@ -1,8 +1,5 @@
-use engine::automaton::*;
-
-use fields::{Dir2D, Pos2D};
-
-use langtonsant::visualisation::Visualisation;
+use crate::engine::automaton::*;
+use crate::fields::{Dir2D, Pos2D};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct LangtonsAnt {
@@ -35,9 +32,9 @@ impl LangtonsAnt {
             .find(|&(d, &c)| c.dir.map_or(false, |c_dir| c_dir == d.turn_around()))
         {
             Some(if self.color {
-                ant_dir.turn_left()
-            } else {
                 ant_dir.turn_right()
+            } else {
+                ant_dir.turn_left()
             })
         } else {
             None
@@ -60,28 +57,5 @@ impl AutomatonCell for LangtonsAnt {
             dir: None,
             pos: *pos,
         }
-    }
-}
-
-impl Visualisation for Board<LangtonsAnt> {
-    fn grid(&self) -> (Vec<char>, usize) {
-        fn to_char(cell: &LangtonsAnt) -> char {
-            match cell.dir {
-                None => {
-                    if cell.color {
-                        'X'
-                    } else {
-                        '_'
-                    }
-                }
-                Some(Dir2D::Up) => '<',
-                Some(Dir2D::Right) => 'v',
-                Some(Dir2D::Down) => '>',
-                Some(Dir2D::Left) => '^',
-            }
-        }
-
-        let res: Vec<char> = self.map.iter().map(|(_, cell)| to_char(cell)).collect();
-        (res, self.dim)
     }
 }

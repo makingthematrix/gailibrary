@@ -1,10 +1,9 @@
 #[cfg(test)]
-mod tests {
-
-    use math::*;
-    use std::ptr::eq;
-    use spectral::prelude::*;
+mod fields_tests {
+    use crate::fields::*;
     pub use cgmath::*;
+    use spectral::prelude::*;
+    use std::ptr::eq;
 
     #[test]
     fn should_compute_distance() {

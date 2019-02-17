@@ -1,5 +1,5 @@
 use num;
-use std::cmp;
+use std::cmp::{max, min};
 use std::fmt;
 use std::vec::Vec;
 
@@ -21,10 +21,10 @@ impl Pos2D {
     }
 
     pub fn from_range(p1: Pos2D, p2: Pos2D) -> Vec<Pos2D> {
-        let xfrom = cmp::min(p1.x, p2.x);
-        let yfrom = cmp::min(p1.y, p2.y);
-        let xto = cmp::max(p1.x, p2.x);
-        let yto = cmp::max(p1.y, p2.y);
+        let xfrom = min(p1.x, p2.x);
+        let yfrom = min(p1.y, p2.y);
+        let xto = max(p1.x, p2.x);
+        let yto = max(p1.y, p2.y);
 
         let mut v = Vec::with_capacity(((xto - xfrom) * (yto - yfrom)) as usize);
         for x in xfrom..xto {
@@ -467,5 +467,84 @@ impl Mul<Coeff> for Coeff {
 
     fn mul(self, c: Coeff) -> Coeff {
         Coeff::new(self.0 * c.0)
+    }
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, Default)]
+pub struct RGB {
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+}
+
+impl RGB {
+    pub fn new(r: u8, g: u8, b: u8) -> RGB {
+        RGB { r, g, b }
+    }
+
+    pub const WHITE: RGB = RGB {
+        r: 255,
+        g: 255,
+        b: 255,
+    };
+    pub const BLACK: RGB = RGB { r: 0, g: 0, b: 0 };
+
+    pub const RED: RGB = RGB { r: 255, g: 0, b: 0 };
+    pub const ORANGE: RGB = RGB {
+        r: 255,
+        g: 165,
+        b: 0,
+    };
+    pub const YELLOW: RGB = RGB {
+        r: 255,
+        g: 255,
+        b: 0,
+    };
+    pub const GREEN: RGB = RGB { r: 0, g: 255, b: 0 };
+    pub const BLUE: RGB = RGB { r: 0, g: 0, b: 255 };
+    pub const INDIGO: RGB = RGB {
+        r: 0,
+        g: 28,
+        b: 200,
+    };
+    pub const VIOLET: RGB = RGB {
+        r: 128,
+        g: 0,
+        b: 255,
+    };
+
+    pub const MONOTONE: [RGB; 2] = [RGB::WHITE, RGB::BLACK];
+    pub const RAINBOW: [RGB; 7] = [
+        RGB::RED,
+        RGB::ORANGE,
+        RGB::YELLOW,
+        RGB::GREEN,
+        RGB::BLUE,
+        RGB::INDIGO,
+        RGB::VIOLET,
+    ];
+
+    pub const ALL: [RGB; 9] = [
+        RGB::WHITE,
+        RGB::BLACK,
+        RGB::RED,
+        RGB::ORANGE,
+        RGB::YELLOW,
+        RGB::GREEN,
+        RGB::BLUE,
+        RGB::INDIGO,
+        RGB::VIOLET,
+    ];
+}
+
+impl Add<RGB> for RGB {
+    type Output = RGB;
+
+    fn add(self, c: RGB) -> <Self as Add<RGB>>::Output {
+        RGB::new(
+            min(self.r + c.r, 255),
+            min(self.b + c.b, 255),
+            min(self.b + c.b, 255),
+        )
     }
 }
