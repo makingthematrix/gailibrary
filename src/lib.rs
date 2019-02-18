@@ -6,8 +6,6 @@ extern crate quickcheck;
 #[macro_use]
 extern crate derive_more;
 #[macro_use]
-extern crate num_derive;
-#[macro_use]
 extern crate lazy_static;
 
 pub mod engine;

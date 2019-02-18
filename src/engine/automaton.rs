@@ -1,10 +1,12 @@
-use crate::fields::{dirs4, Dir2D, Pos2D};
+use crate::fields::{Dir2D, Pos2D, DIRS4};
 use crate::utils::umap::UMap;
 
+use crate::utils::umap::UMapIter;
 use std::collections::HashMap;
 
-pub trait AutomatonCell: Clone + Copy + PartialEq {
+pub trait AutomatonCell: Clone + Copy + PartialEq + Sized {
     fn update(&self, neighborhood: &Neighborhood<Self>) -> Self;
+    fn position(&self) -> Pos2D;
 
     fn new(pos: &Pos2D) -> Self;
 }
@@ -14,7 +16,7 @@ pub trait Neighborhood<C: AutomatonCell> {
 
     fn neumann(&self, pos: &Pos2D) -> HashMap<Dir2D, &C> {
         let mut map = HashMap::new();
-        dirs4.iter().for_each(|&dir| {
+        DIRS4.iter().for_each(|&dir| {
             map.insert(dir, self.find_cell(&pos.move_by_one(dir)));
         });
         map
@@ -23,35 +25,27 @@ pub trait Neighborhood<C: AutomatonCell> {
 
 #[derive(Default, Clone)]
 pub struct Board<C: AutomatonCell> {
-    pub dim: usize,
-    pub map: UMap<C>,
-}
-
-fn get_id(dim: usize, pos: &Pos2D) -> usize {
-    fn wrap(i: i64, dim: usize) -> usize {
-        match i % dim as i64 {
-            x if x >= 0 => x as usize,
-            x => (x + dim as i64) as usize,
-        }
-    }
-
-    wrap(pos.x, dim) * dim + wrap(pos.y, dim)
-}
-
-impl<C: AutomatonCell> Neighborhood<C> for Board<C> {
-    fn find_cell(&self, pos: &Pos2D) -> &C {
-        let id = get_id(self.dim, pos);
-        self.map.get_ref(id).unwrap()
-    }
+    dim: usize,
+    map: UMap<C>,
 }
 
 impl<C: AutomatonCell> Board<C> {
+    fn pos2id(dim: usize, pos: &Pos2D) -> usize {
+        fn wrap(i: i64, dim: usize) -> usize {
+            match i % dim as i64 {
+                x if x >= 0 => x as usize,
+                x => (x + dim as i64) as usize,
+            }
+        }
+
+        wrap(pos.x, dim) * dim + wrap(pos.y, dim)
+    }
+
     pub fn new(dim: usize) -> Self {
         let mut map = UMap::<C>::with_capacity(dim);
-        Pos2D::from_dim(dim).iter().for_each(|pos| {
-            let id = get_id(dim, pos);
-            map.put(id, C::new(pos))
-        });
+        Pos2D::from_dim(dim)
+            .iter()
+            .for_each(|pos| map.put(Board::<C>::pos2id(dim, pos), C::new(pos)));
 
         Board { dim, map }
     }
@@ -59,7 +53,7 @@ impl<C: AutomatonCell> Board<C> {
     pub fn update(&self) -> Self {
         let mut map = UMap::<C>::with_capacity(self.dim);
         Pos2D::from_dim(self.dim).iter().for_each(|pos| {
-            let id = get_id(self.dim, pos);
+            let id = Board::<C>::pos2id(self.dim, pos);
             if let Some(ref cell) = self.map.get_ref(id) {
                 map.put(id, cell.update(self))
             }
@@ -68,42 +62,80 @@ impl<C: AutomatonCell> Board<C> {
         Board { dim: self.dim, map }
     }
 
-    pub fn change_one(&self, position: &Pos2D, f: impl Fn(&C) -> C) -> Self {
-        let mut map = UMap::<C>::with_capacity(self.dim);
-        Pos2D::from_dim(self.dim).iter().for_each(|pos| {
-            let id = get_id(self.dim, pos);
-            if let Some(ref cell) = self.map.get_ref(id) {
-                if pos == position {
-                    map.put(id, f(cell));
-                } else {
-                    map.put(id, **cell)
-                }
-            }
-        });
+    pub fn copy_and_update_one(&self, new_cell: &C) -> Self {
+        self.copy_and_update(&[*new_cell])
+    }
 
+    pub fn copy_and_update(&self, cells: &[C]) -> Self {
+        let mut map = UMap::<C>::with_capacity(self.dim);
+        map.clone_from(&self.map);
+
+        for c in cells {
+            let id = Board::<C>::pos2id(self.dim, &c.position());
+            map.put(id, *c);
+        }
+
+        Board { dim: self.dim, map }
+    }
+
+    pub fn copy_and_update_2(&self, cells: &UMap<C>) -> Self {
+        let mut map = UMap::<C>::with_capacity(self.dim);
+        map.clone_from(&self.map);
+        cells.iter().for_each(|(id, cell)| map.put(id, *cell));
         Board { dim: self.dim, map }
     }
 }
 
+impl<C: AutomatonCell> Neighborhood<C> for Board<C> {
+    fn find_cell(&self, pos: &Pos2D) -> &C {
+        self.map.get_ref(Board::<C>::pos2id(self.dim, pos)).unwrap()
+    }
+}
+
 #[derive(Default, Clone)]
-pub struct Automaton<C: AutomatonCell>(pub Board<C>);
+pub struct Automaton<C: AutomatonCell> {
+    board: Board<C>,
+    changes: UMap<C>,
+}
 
 impl<C: AutomatonCell> Automaton<C> {
     pub fn new(dim: usize) -> Automaton<C> {
-        Automaton(Board::<C>::new(dim))
+        Automaton {
+            board: Board::<C>::new(dim),
+            changes: UMap::<C>::with_capacity(dim),
+        }
     }
 
     pub fn next(&mut self) {
-        self.0 = self.0.update();
+        self.apply_changes();
+        self.board = self.board.update();
     }
 
-    pub fn change(&mut self, f: impl Fn(&Board<C>) -> Board<C>) {
-        self.0 = f(&self.0);
+    pub fn transform(&mut self, f: impl Fn(&Board<C>) -> Board<C>) {
+        self.board = f(&self.board);
+    }
+
+    pub fn add_change(&mut self, changed_cell: &C) {
+        self.changes.put(
+            Board::<C>::pos2id(self.dim(), &changed_cell.position()),
+            *changed_cell,
+        );
+    }
+
+    pub fn apply_changes(&mut self) {
+        let cs = self.changes.clone();
+        self.board = self.board.copy_and_update_2(&cs);
+        self.changes = UMap::<C>::with_capacity(self.dim()); // TODO: implement `clear` for `UMap`
     }
 
     #[inline]
     pub fn dim(&self) -> usize {
-        self.0.dim
+        self.board.dim
+    }
+
+    #[inline]
+    pub fn board_iter(&self) -> UMapIter<C> {
+        self.board.map.iter()
     }
 }
 
@@ -111,7 +143,7 @@ impl<C: AutomatonCell> Iterator for Automaton<C> {
     type Item = Board<C>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.update();
-        Some(self.0.clone())
+        self.board.update();
+        Some(self.board.clone())
     }
 }

@@ -12,8 +12,10 @@ use itertools::Itertools;
 const WINDOW_SIZE: usize = 800;
 
 use gailibrary::engine::automaton::Automaton;
-use gailibrary::fields::{Dir2D, Pos2D, RGB};
+use gailibrary::fields::{Pos2D, RGB};
 use gailibrary::langtonsant::langtons_ant::LangtonsAnt;
+use ggez::event::Keycode;
+use ggez::event::Mod;
 
 #[derive(Debug, Clone, Copy)]
 struct CellRectangle {
@@ -24,6 +26,7 @@ struct CellRectangle {
 struct MainState {
     iteration: usize,
     cell_size: usize,
+    pause: bool,
     auto: Automaton<LangtonsAnt>,
 }
 
@@ -32,13 +35,13 @@ impl MainState {
         Ok(MainState {
             iteration: 0,
             cell_size: WINDOW_SIZE / dim,
+            pause: false,
             auto: Automaton::<LangtonsAnt>::new(dim),
         })
     }
 
     pub fn add_ant(&mut self, ant_pos: Pos2D) {
-        self.auto
-            .change(|board| board.change_one(&ant_pos, |_| LangtonsAnt::new_ant(&ant_pos)));
+        self.auto.add_change(&LangtonsAnt::new_ant(&ant_pos));
     }
 
     pub fn update(&mut self) {
@@ -46,6 +49,17 @@ impl MainState {
             self.auto.next();
         }
         self.iteration += 1;
+    }
+
+    pub fn draw_cells(&mut self, ctx: &mut Context) {
+        for (color, group) in &self.auto2cells().into_iter().group_by(|c| c.color) {
+            graphics::set_color(ctx, Color::from_rgb(color.r, color.g, color.b)).unwrap();
+            self.draw(ctx, group.into_iter().map(|c| c.position).collect());
+        }
+    }
+
+    pub fn pixels2pos(&self, x: usize, y: usize) -> Pos2D {
+        Pos2D::new((x / self.cell_size) as i64, (y / self.cell_size) as i64)
     }
 
     fn draw(&mut self, ctx: &mut Context, positions: Vec<Pos2D>) {
@@ -65,19 +79,10 @@ impl MainState {
         });
         match builder.build(ctx) {
             Ok(mesh) => {
-                mesh.draw(ctx, Point2::new(0.0, 0.0), 0.0);
+                mesh.draw(ctx, Point2::new(0.0, 0.0), 0.0).unwrap();
             }
             Err(_) => {}
         };
-    }
-
-    fn draw_cells(&mut self, ctx: &mut Context) {
-        for (color, group) in &self.auto2cells().into_iter().group_by(|c| c.color) {
-            if color != RGB::WHITE {
-                graphics::set_color(ctx, Color::from_rgb(color.r, color.g, color.b));
-                self.draw(ctx, group.into_iter().map(|c| c.position).collect());
-            }
-        }
     }
 
     fn auto2cells(&self) -> Vec<CellRectangle> {
@@ -97,10 +102,9 @@ impl MainState {
         }
         let res: Vec<CellRectangle> = self
             .auto
-            .0
-            .map
-            .iter()
+            .board_iter()
             .map(|(_, cell)| to_cell(cell))
+            .filter(|cell| cell.color != RGB::WHITE)
             .collect();
         res
     }
@@ -108,17 +112,37 @@ impl MainState {
 
 impl event::EventHandler for MainState {
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
-        self.update();
+        if !self.pause {
+            self.update();
+        }
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        graphics::clear(ctx);
-
-        self.draw_cells(ctx);
-
-        graphics::present(ctx);
+        if !self.pause {
+            graphics::clear(ctx);
+            self.draw_cells(ctx);
+            graphics::present(ctx);
+        }
         Ok(())
+    }
+
+    fn mouse_button_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        _btn: event::MouseButton,
+        x: i32,
+        y: i32,
+    ) {
+        let ant_pos = self.pixels2pos(x as usize, y as usize);
+        println!("Button clicked at: {}", ant_pos);
+        self.auto.add_change(&LangtonsAnt::new_ant(&ant_pos))
+    }
+
+    fn key_up_event(&mut self, _ctx: &mut Context, _keycode: Keycode, _keymod: Mod, _repeat: bool) {
+        if _keycode == Keycode::Space {
+            self.pause = !self.pause;
+        }
     }
 }
 
@@ -129,7 +153,8 @@ pub fn main() {
     graphics::set_mode(
         ctx,
         WindowMode::default().dimensions(WINDOW_SIZE as u32, WINDOW_SIZE as u32),
-    );
+    )
+    .unwrap();
     graphics::set_screen_coordinates(
         ctx,
         Rect {
@@ -138,7 +163,8 @@ pub fn main() {
             w: WINDOW_SIZE as f32,
             h: WINDOW_SIZE as f32,
         },
-    );
+    )
+    .unwrap();
 
     let dim = 100;
     let state = &mut MainState::new(ctx, dim).unwrap();

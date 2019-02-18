@@ -51,6 +51,10 @@ impl AutomatonCell for LangtonsAnt {
         }
     }
 
+    fn position(&self) -> Pos2D {
+        self.pos
+    }
+
     fn new(pos: &Pos2D) -> Self {
         LangtonsAnt {
             color: false,

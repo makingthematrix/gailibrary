@@ -138,7 +138,7 @@ where
 
     #[inline]
     pub fn to_set(&self) -> USet {
-        let set: Vec<bool> = self.vec.iter().map(|value| value.is_some()).collect();
+        let set: Vec<bool> = self.vec.iter().map(Option::is_some).collect();
         USet::from_fields(set, self.len)
     }
 

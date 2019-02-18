@@ -1,4 +1,3 @@
-use num;
 use std::cmp::{max, min};
 use std::fmt;
 use std::vec::Vec;
@@ -78,7 +77,7 @@ impl fmt::Display for Dir2D {
 }
 
 lazy_static! {
-    pub static ref dirs4: [Dir2D; 4] = [Dir2D::Up, Dir2D::Right, Dir2D::Down, Dir2D::Left];
+    pub static ref DIRS4: [Dir2D; 4] = [Dir2D::Up, Dir2D::Right, Dir2D::Down, Dir2D::Left];
 }
 
 impl Dir2D {
@@ -128,7 +127,7 @@ impl Dir2D {
     }
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, FromPrimitive)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub enum WhiteBlack {
     White = 0,
     Black,
@@ -141,12 +140,6 @@ impl fmt::Display for WhiteBlack {
             WhiteBlack::Black => "Black",
         };
         write!(f, "WhiteBlack({})", color)
-    }
-}
-
-impl From<usize> for WhiteBlack {
-    fn from(c: usize) -> Self {
-        num::FromPrimitive::from_usize(c).unwrap()
     }
 }
 
