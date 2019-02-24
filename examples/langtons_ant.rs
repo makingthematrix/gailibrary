@@ -24,9 +24,11 @@ struct CellRectangle {
 }
 
 struct MainState {
-    iteration: usize,
     cell_size: usize,
+
+    iteration: usize,
     pause: bool,
+
     auto: Automaton<LangtonsAnt>,
 }
 
@@ -148,7 +150,7 @@ impl event::EventHandler for MainState {
 
 pub fn main() {
     let c = conf::Conf::new();
-    let ctx = &mut Context::load_from_conf("super_simple", "ggez", c).unwrap();
+    let ctx = &mut Context::load_from_conf("langtons_ant", "makingthematrix", c).unwrap();
     graphics::set_background_color(ctx, graphics::WHITE);
     graphics::set_mode(
         ctx,

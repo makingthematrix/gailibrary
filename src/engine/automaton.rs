@@ -4,6 +4,9 @@ use crate::utils::umap::UMap;
 use crate::utils::umap::UMapIter;
 use std::collections::HashMap;
 
+//use std::time::Instant;
+//use std::time::Duration;
+
 pub trait AutomatonCell: Clone + Copy + PartialEq + Sized {
     fn update(&self, neighborhood: &Neighborhood<Self>) -> Self;
     fn position(&self) -> Pos2D;
@@ -51,13 +54,17 @@ impl<C: AutomatonCell> Board<C> {
     }
 
     pub fn update(&self) -> Self {
+        //let mut updates = Duration::new(0, 0);
         let mut map = UMap::<C>::with_capacity(self.dim);
-        Pos2D::from_dim(self.dim).iter().for_each(|pos| {
-            let id = Board::<C>::pos2id(self.dim, pos);
-            if let Some(ref cell) = self.map.get_ref(id) {
-                map.put(id, cell.update(self))
-            }
+        self.map.iter().for_each(|(key, cell)| {
+            //let t0 = Instant::now();
+            let new_cell = cell.update(self);
+            //let t1 = Instant::now();
+            map.put(key, new_cell);
+            //updates += t1 - t0;
         });
+
+        //println!("updates took {:?}", updates);
 
         Board { dim: self.dim, map }
     }
@@ -102,7 +109,7 @@ impl<C: AutomatonCell> Automaton<C> {
     pub fn new(dim: usize) -> Automaton<C> {
         Automaton {
             board: Board::<C>::new(dim),
-            changes: UMap::<C>::with_capacity(dim),
+            changes: UMap::<C>::with_capacity(dim)
         }
     }
 
