@@ -1,4 +1,4 @@
-use crate::fields::{Dir2D, Pos2D, DIRS4};
+use crate::fields::{Dir2D, Pos2D, DIRS4, DIRS8};
 use crate::utils::umap::UMap;
 
 use crate::utils::umap::UMapIter;
@@ -18,8 +18,16 @@ pub trait Neighborhood<C: AutomatonCell> {
     fn find_cell(&self, pos: &Pos2D) -> &C;
 
     fn neumann(&self, pos: &Pos2D) -> HashMap<Dir2D, &C> {
-        let mut map = HashMap::new();
+        let mut map = HashMap::with_capacity(4);
         DIRS4.iter().for_each(|&dir| {
+            map.insert(dir, self.find_cell(&pos.move_by_one(dir)));
+        });
+        map
+    }
+
+    fn moore(&self, pos: &Pos2D) -> HashMap<Dir2D, &C> {
+        let mut map = HashMap::with_capacity(8);
+        DIRS8.iter().for_each(|&dir| {
             map.insert(dir, self.find_cell(&pos.move_by_one(dir)));
         });
         map

@@ -41,11 +41,20 @@ impl Pos2D {
             Dir2D::Right => Pos2D::new(self.x + 1, self.y),
             Dir2D::Down => Pos2D::new(self.x, self.y + 1),
             Dir2D::Left => Pos2D::new(self.x - 1, self.y),
+
+            Dir2D::UpLeft => Pos2D::new(self.x - 1, self.y - 1),
+            Dir2D::UpRight => Pos2D::new(self.x + 1, self.y - 1),
+            Dir2D::DownRight => Pos2D::new(self.x + 1, self.y + 1),
+            Dir2D::DownLeft => Pos2D::new(self.x - 1, self.y + 1),
         }
     }
 
-    pub fn dir_to(&self, pos: Pos2D) -> Dir2D {
+    pub fn dir_to4(&self, pos: Pos2D) -> Dir2D {
         Dir2D::approx4(pos.x as f64 - self.x as f64, pos.y as f64 - self.y as f64)
+    }
+
+    pub fn dir_to8(&self, pos: Pos2D) -> Dir2D {
+        Dir2D::approx8(pos.x as f64 - self.x as f64, pos.y as f64 - self.y as f64)
     }
 }
 
@@ -62,6 +71,11 @@ pub enum Dir2D {
     Right,
     Down,
     Left,
+
+    UpLeft,
+    UpRight,
+    DownRight,
+    DownLeft
 }
 
 impl fmt::Display for Dir2D {
@@ -71,6 +85,10 @@ impl fmt::Display for Dir2D {
             Dir2D::Right => "Right",
             Dir2D::Down => "Down",
             Dir2D::Left => "Left",
+            Dir2D::UpLeft =>"UpLeft",
+            Dir2D::UpRight => "UpRight",
+            Dir2D::DownLeft => "DownLeft",
+            Dir2D::DownRight => "DownRight"
         };
         write!(f, "Dir2D({})", dir)
     }
@@ -78,6 +96,16 @@ impl fmt::Display for Dir2D {
 
 lazy_static! {
     pub static ref DIRS4: [Dir2D; 4] = [Dir2D::Up, Dir2D::Right, Dir2D::Down, Dir2D::Left];
+    pub static ref DIRS8: [Dir2D; 8] = [
+        Dir2D::Up,
+        Dir2D::Right,
+        Dir2D::Down,
+        Dir2D::Left,
+        Dir2D::UpLeft,
+        Dir2D::UpRight,
+        Dir2D::DownLeft,
+        Dir2D::DownRight
+    ];
 }
 
 impl Dir2D {
@@ -87,6 +115,11 @@ impl Dir2D {
             Dir2D::Right => Dir2D::Down,
             Dir2D::Down => Dir2D::Left,
             Dir2D::Left => Dir2D::Up,
+
+            Dir2D::UpLeft => Dir2D::UpRight,
+            Dir2D::UpRight => Dir2D::DownRight,
+            Dir2D::DownRight => Dir2D::DownLeft,
+            Dir2D::DownLeft => Dir2D::UpLeft
         }
     }
 
@@ -96,6 +129,11 @@ impl Dir2D {
             Dir2D::Right => Dir2D::Up,
             Dir2D::Down => Dir2D::Right,
             Dir2D::Left => Dir2D::Down,
+
+            Dir2D::UpLeft => Dir2D::DownLeft,
+            Dir2D::UpRight => Dir2D::UpLeft,
+            Dir2D::DownRight => Dir2D::UpRight,
+            Dir2D::DownLeft => Dir2D::DownRight
         }
     }
 
@@ -105,6 +143,11 @@ impl Dir2D {
             Dir2D::Right => Dir2D::Left,
             Dir2D::Down => Dir2D::Up,
             Dir2D::Left => Dir2D::Right,
+
+            Dir2D::UpLeft => Dir2D::DownRight,
+            Dir2D::UpRight => Dir2D::DownLeft,
+            Dir2D::DownRight => Dir2D::UpLeft,
+            Dir2D::DownLeft => Dir2D::UpRight
         }
     }
 
@@ -123,6 +166,43 @@ impl Dir2D {
             Dir2D::Down
         } else {
             Dir2D::Left
+        }
+    }
+
+    pub fn approx8(x: f64, y: f64) -> Dir2D  {
+        let abs_x = x.abs();
+        if y < 0.0 {
+            if 2.0 * abs_x < -y {
+                Dir2D::Up
+            } else if abs_x < -2.0 * y {
+                if x < 0.0 {
+                    Dir2D::UpLeft
+                } else {
+                    Dir2D::UpRight
+                }
+            } else {
+                if x < 0.0 {
+                    Dir2D::Left
+                } else {
+                    Dir2D::Right
+                }
+            }
+        } else {
+            if 2.0 * abs_x < y {
+                Dir2D::Down
+            } else if abs_x < 2.0 * y {
+                if x < 0.0 {
+                    Dir2D::DownLeft
+                } else {
+                    Dir2D::DownRight
+                }
+            } else {
+                if x < 0.0 {
+                    Dir2D::Left
+                } else {
+                    Dir2D::Right
+                }
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ const WINDOW_SIZE: usize = 800;
 
 use gailibrary::engine::automaton::Automaton;
 use gailibrary::fields::{Pos2D, RGB};
-use gailibrary::examples::langtons_ant::LangtonsAnt;
+use gailibrary::examples::game_of_life::GameOfLife;
 use ggez::event::Keycode;
 use ggez::event::Mod;
 
@@ -29,7 +29,7 @@ struct MainState {
     iteration: usize,
     pause: bool,
 
-    auto: Automaton<LangtonsAnt>,
+    auto: Automaton<GameOfLife>,
 }
 
 impl MainState {
@@ -38,12 +38,12 @@ impl MainState {
             iteration: 0,
             cell_size: WINDOW_SIZE / dim,
             pause: false,
-            auto: Automaton::<LangtonsAnt>::new(dim),
+            auto: Automaton::<GameOfLife>::new(dim),
         })
     }
 
-    pub fn add_ant(&mut self, ant_pos: Pos2D) {
-        self.auto.add_change(&LangtonsAnt::new_ant(&ant_pos));
+    pub fn add_life(&mut self, life_pos: Pos2D) {
+        self.auto.add_change(&GameOfLife::new_life(&life_pos));
     }
 
     pub fn update(&mut self) {
@@ -88,18 +88,9 @@ impl MainState {
     }
 
     fn auto2cells(&self) -> Vec<CellRectangle> {
-        fn to_cell(cell: &LangtonsAnt) -> CellRectangle {
+        fn to_cell(cell: &GameOfLife) -> CellRectangle {
             let position = cell.pos;
-            let color = match cell.dir {
-                None => {
-                    if cell.color {
-                        RGB::BLACK
-                    } else {
-                        RGB::WHITE
-                    }
-                }
-                Some(_) => RGB::RED,
-            };
+            let color = if cell.life { RGB::BLACK } else { RGB::WHITE };
             CellRectangle { position, color }
         }
         let res: Vec<CellRectangle> = self
@@ -136,9 +127,9 @@ impl event::EventHandler for MainState {
         x: i32,
         y: i32,
     ) {
-        let ant_pos = self.pixels2pos(x as usize, y as usize);
-        println!("Button clicked at: {}", ant_pos);
-        self.auto.add_change(&LangtonsAnt::new_ant(&ant_pos))
+        let life_pos = self.pixels2pos(x as usize, y as usize);
+        println!("Button clicked at: {}", life_pos);
+        self.auto.add_change(&GameOfLife::new_life(&life_pos))
     }
 
     fn key_up_event(&mut self, _ctx: &mut Context, _keycode: Keycode, _keymod: Mod, _repeat: bool) {
@@ -150,13 +141,13 @@ impl event::EventHandler for MainState {
 
 pub fn main() {
     let c = conf::Conf::new();
-    let ctx = &mut Context::load_from_conf("langtons_ant", "makingthematrix", c).unwrap();
+    let ctx = &mut Context::load_from_conf("game_of_life", "makingthematrix", c).unwrap();
     graphics::set_background_color(ctx, graphics::WHITE);
     graphics::set_mode(
         ctx,
         WindowMode::default().dimensions(WINDOW_SIZE as u32, WINDOW_SIZE as u32),
     )
-    .unwrap();
+        .unwrap();
     graphics::set_screen_coordinates(
         ctx,
         Rect {
@@ -166,10 +157,10 @@ pub fn main() {
             h: WINDOW_SIZE as f32,
         },
     )
-    .unwrap();
+        .unwrap();
 
     let dim = 100;
     let state = &mut MainState::new(ctx, dim).unwrap();
-    state.add_ant(Pos2D::new((dim as i64) / 2, (dim as i64) / 2));
+    state.add_life(Pos2D::new((dim as i64) / 2, (dim as i64) / 2));
     event::run(ctx, state).unwrap();
 }
