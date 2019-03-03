@@ -16,7 +16,12 @@ impl GameOfLife {
     }
 
     fn update_life(&self, neighborhood: &Neighborhood<Self>) -> bool {
-        match neighborhood.moore(&self.pos).iter().filter(|&(_, &c)| c.life).count() {
+        match neighborhood
+            .moore(&self.pos)
+            .iter()
+            .filter(|&(_, &c)| c.life)
+            .count()
+        {
             3 if self.life => true,
             n if self.life && (n < 2 || n > 3) => false,
             _ => self.life,

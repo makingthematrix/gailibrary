@@ -9,10 +9,11 @@ extern crate derive_more;
 extern crate lazy_static;
 
 pub mod engine;
+pub mod examples;
 pub mod fields;
 pub mod ids;
-pub mod examples;
 pub mod utils;
+pub mod visualisation;
 
 #[cfg(test)]
 mod fields_tests;

@@ -75,7 +75,7 @@ pub enum Dir2D {
     UpLeft,
     UpRight,
     DownRight,
-    DownLeft
+    DownLeft,
 }
 
 impl fmt::Display for Dir2D {
@@ -85,10 +85,10 @@ impl fmt::Display for Dir2D {
             Dir2D::Right => "Right",
             Dir2D::Down => "Down",
             Dir2D::Left => "Left",
-            Dir2D::UpLeft =>"UpLeft",
+            Dir2D::UpLeft => "UpLeft",
             Dir2D::UpRight => "UpRight",
             Dir2D::DownLeft => "DownLeft",
-            Dir2D::DownRight => "DownRight"
+            Dir2D::DownRight => "DownRight",
         };
         write!(f, "Dir2D({})", dir)
     }
@@ -119,7 +119,7 @@ impl Dir2D {
             Dir2D::UpLeft => Dir2D::UpRight,
             Dir2D::UpRight => Dir2D::DownRight,
             Dir2D::DownRight => Dir2D::DownLeft,
-            Dir2D::DownLeft => Dir2D::UpLeft
+            Dir2D::DownLeft => Dir2D::UpLeft,
         }
     }
 
@@ -133,7 +133,7 @@ impl Dir2D {
             Dir2D::UpLeft => Dir2D::DownLeft,
             Dir2D::UpRight => Dir2D::UpLeft,
             Dir2D::DownRight => Dir2D::UpRight,
-            Dir2D::DownLeft => Dir2D::DownRight
+            Dir2D::DownLeft => Dir2D::DownRight,
         }
     }
 
@@ -147,7 +147,7 @@ impl Dir2D {
             Dir2D::UpLeft => Dir2D::DownRight,
             Dir2D::UpRight => Dir2D::DownLeft,
             Dir2D::DownRight => Dir2D::UpLeft,
-            Dir2D::DownLeft => Dir2D::UpRight
+            Dir2D::DownLeft => Dir2D::UpRight,
         }
     }
 
@@ -169,7 +169,7 @@ impl Dir2D {
         }
     }
 
-    pub fn approx8(x: f64, y: f64) -> Dir2D  {
+    pub fn approx8(x: f64, y: f64) -> Dir2D {
         let abs_x = x.abs();
         if y < 0.0 {
             if 2.0 * abs_x < -y {

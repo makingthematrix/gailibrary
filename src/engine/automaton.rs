@@ -117,7 +117,7 @@ impl<C: AutomatonCell> Automaton<C> {
     pub fn new(dim: usize) -> Automaton<C> {
         Automaton {
             board: Board::<C>::new(dim),
-            changes: UMap::<C>::with_capacity(dim)
+            changes: UMap::<C>::with_capacity(dim),
         }
     }
 
