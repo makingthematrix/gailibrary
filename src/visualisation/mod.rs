@@ -87,18 +87,16 @@ impl<C: CellVisualisation> MainState<C> {
             ];
             builder.polygon(DrawMode::Fill, &pts);
         });
-        match builder.build(ctx) {
-            Ok(mesh) => {
-                mesh.draw(ctx, Point2::new(0.0, 0.0), 0.0).unwrap();
-            }
-            Err(_) => {}
+
+        if let Ok(mesh) = builder.build(ctx) {
+            mesh.draw(ctx, Point2::new(0.0, 0.0), 0.0).unwrap();
         };
     }
 
     fn draw_cells(&mut self, ctx: &mut Context) {
         for (color, group) in &self.auto2cells().into_iter().group_by(|c| c.color) {
             graphics::set_color(ctx, Color::from_rgb(color.r, color.g, color.b)).unwrap();
-            self.draw(ctx, group.into_iter().map(|c| c.position).collect());
+            self.draw(ctx, group.map(|c| c.position).collect());
         }
     }
 }
@@ -122,14 +120,19 @@ impl<C: CellVisualisation> event::EventHandler for MainState<C> {
 
     fn mouse_button_down_event(
         &mut self,
-        _ctx: &mut Context,
+        ctx: &mut Context,
         _btn: event::MouseButton,
         x: i32,
         y: i32,
     ) {
         let pos = self.pixels2pos(x as usize, y as usize);
         println!("Button clicked at: {}", pos);
-        self.auto.add_change(&C::new_cell(&pos))
+        self.pause = true;
+        self.auto.add_change(&C::new_cell(&pos));
+        self.auto.apply_changes();
+        self.draw_cells(ctx);
+
+        graphics::present(ctx);
     }
 
     fn key_up_event(&mut self, _ctx: &mut Context, _keycode: Keycode, _keymod: Mod, _repeat: bool) {

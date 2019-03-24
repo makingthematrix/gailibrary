@@ -2,7 +2,7 @@ use std::cmp::{max, min};
 use std::fmt;
 use std::vec::Vec;
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub struct Pos2D {
     pub x: i64,
     pub y: i64,
@@ -60,12 +60,17 @@ impl Pos2D {
 
 impl fmt::Display for Pos2D {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // Customize so only `x` and `y` are denoted.
-        write!(f, "Pos2D({}, {})", self.x, self.y)
+        write!(f, "({}, {})", self.x, self.y)
     }
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+impl fmt::Debug for Pos2D {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub enum Dir2D {
     Up,
     Right,
@@ -76,22 +81,6 @@ pub enum Dir2D {
     UpRight,
     DownRight,
     DownLeft,
-}
-
-impl fmt::Display for Dir2D {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let dir = match *self {
-            Dir2D::Up => "Up",
-            Dir2D::Right => "Right",
-            Dir2D::Down => "Down",
-            Dir2D::Left => "Left",
-            Dir2D::UpLeft => "UpLeft",
-            Dir2D::UpRight => "UpRight",
-            Dir2D::DownLeft => "DownLeft",
-            Dir2D::DownRight => "DownRight",
-        };
-        write!(f, "Dir2D({})", dir)
-    }
 }
 
 lazy_static! {
@@ -180,30 +169,56 @@ impl Dir2D {
                 } else {
                     Dir2D::UpRight
                 }
+            } else if x < 0.0 {
+                Dir2D::Left
             } else {
-                if x < 0.0 {
-                    Dir2D::Left
-                } else {
-                    Dir2D::Right
-                }
+                Dir2D::Right
             }
+        } else if 2.0 * abs_x < y {
+            Dir2D::Down
+        } else if abs_x < 2.0 * y {
+            if x < 0.0 {
+                Dir2D::DownLeft
+            } else {
+                Dir2D::DownRight
+            }
+        } else if x < 0.0 {
+            Dir2D::Left
         } else {
-            if 2.0 * abs_x < y {
-                Dir2D::Down
-            } else if abs_x < 2.0 * y {
-                if x < 0.0 {
-                    Dir2D::DownLeft
-                } else {
-                    Dir2D::DownRight
-                }
-            } else {
-                if x < 0.0 {
-                    Dir2D::Left
-                } else {
-                    Dir2D::Right
-                }
-            }
+            Dir2D::Right
         }
+    }
+}
+
+impl fmt::Display for Dir2D {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let dir = match *self {
+            Dir2D::Up => "Up",
+            Dir2D::Right => "Right",
+            Dir2D::Down => "Down",
+            Dir2D::Left => "Left",
+            Dir2D::UpLeft => "UpLeft",
+            Dir2D::UpRight => "UpRight",
+            Dir2D::DownLeft => "DownLeft",
+            Dir2D::DownRight => "DownRight",
+        };
+        write!(f, "Dir2D({})", dir)
+    }
+}
+
+impl fmt::Debug for Dir2D {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let dir = match *self {
+            Dir2D::Up => "Up",
+            Dir2D::Right => "Right",
+            Dir2D::Down => "Down",
+            Dir2D::Left => "Left",
+            Dir2D::UpLeft => "UpLeft",
+            Dir2D::UpRight => "UpRight",
+            Dir2D::DownLeft => "DownLeft",
+            Dir2D::DownRight => "DownRight",
+        };
+        write!(f, "Dir2D({:?})", dir)
     }
 }
 

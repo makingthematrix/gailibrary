@@ -3,12 +3,13 @@
 use crate::utils::uset::USet;
 use std::clone::Clone;
 use std::cmp::{max, min};
+use std::fmt;
 use std::ops::{Add, BitXor, Mul, Sub};
 
 // TODO: https://doc.rust-lang.org/src/alloc/vec_deque.rs.html#1909-1913
 // rewrite in a similar fashion
 
-#[derive(Debug, Default, Clone)]
+#[derive(Default, Clone)]
 pub struct UMap<T> {
     vec: Vec<Option<T>>,
     len: usize,
@@ -327,5 +328,21 @@ where
 {
     fn from(vec: Vec<(usize, T)>) -> Self {
         UMap::from_vec(&vec)
+    }
+}
+
+impl<T> fmt::Debug for UMap<T>
+where
+    T: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "UMap(").unwrap();
+        for item in &self.vec {
+            if let Some(entry) = item {
+                write!(f, "{:?}", entry).unwrap();
+            }
+        }
+        write!(f, ")").unwrap();
+        Ok(())
     }
 }

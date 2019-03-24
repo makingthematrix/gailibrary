@@ -4,10 +4,9 @@ use crate::utils::umap::UMap;
 use crate::utils::umap::UMapIter;
 use std::collections::HashMap;
 
-//use std::time::Instant;
-//use std::time::Duration;
+use std::fmt::Debug;
 
-pub trait AutomatonCell: Clone + Copy + PartialEq + Sized {
+pub trait AutomatonCell: Clone + Copy + PartialEq + Sized + Debug {
     fn update(&self, neighborhood: &Neighborhood<Self>) -> Self;
     fn position(&self) -> Pos2D;
 

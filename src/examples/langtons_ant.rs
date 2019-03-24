@@ -1,7 +1,9 @@
 use crate::engine::automaton::*;
 use crate::fields::{Dir2D, Pos2D};
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+use std::fmt;
+
+#[derive(Copy, Clone, PartialEq)]
 pub struct LangtonsAnt {
     pub color: bool,
     pub dir: Option<Dir2D>,
@@ -61,5 +63,15 @@ impl AutomatonCell for LangtonsAnt {
             dir: None,
             pos: *pos,
         }
+    }
+}
+
+impl fmt::Debug for LangtonsAnt {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "LangtonsAnt({:?} -> color: {:?}, dir: {:?})",
+            self.pos, self.color, self.dir
+        )
     }
 }
