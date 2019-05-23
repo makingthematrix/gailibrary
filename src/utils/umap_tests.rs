@@ -133,7 +133,7 @@ mod umap_tests {
         assert_that!(iter3.next()).is_equal_to(Some((4, &4)));
         assert_that!(iter3.next()).is_equal_to(None);
     }
-
+    /*
     #[test]
     fn xor_maps() {
         let map1: UMap<i32> = vec![(2, 2), (4, 4), (5, 5)].into();
@@ -149,5 +149,5 @@ mod umap_tests {
         assert_that!(iter3.next()).is_equal_to(Some((8, &8)));
         assert_that!(iter3.next()).is_equal_to(None);
         assert_that!(iter3.next()).is_equal_to(None);
-    }
+    }*/
 }

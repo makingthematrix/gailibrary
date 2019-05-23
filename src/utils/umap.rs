@@ -11,7 +11,7 @@ use std::ops::{Add, BitXor, Mul, Sub};
 
 #[derive(Default, Clone)]
 pub struct UMap<T> {
-    vec: Vec<Option<T>>,
+    pub vec: Vec<Option<T>>,
     len: usize,
 }
 

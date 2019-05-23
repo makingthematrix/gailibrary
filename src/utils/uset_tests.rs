@@ -56,7 +56,7 @@ mod uset_tests {
                 return TestResult::discard()
             }
 
-            let result: Vec<usize> = USet::from(&unique_v).iter().collect();
+            let result: Vec<usize> = USet::from(&unique_v).into_iter().collect();
             TestResult::from_bool(vec_compare(&unique_v, &result))
         }
     }
@@ -164,6 +164,33 @@ mod uset_tests {
     }
 
     #[test]
+    fn should_add_all() {
+        let mut s1 = uset![0, 3, 8, 10];
+        s1.add_all(&vec![1, 4]);
+        assert_that!(&s1).is_equal_to(uset![0, 1, 3, 4, 8, 10]);
+
+        let mut s2 = uset![0, 3, 8, 10];
+        s2.add_all(&Vec::<usize>::new());
+        assert_that!(&s2).is_equal_to(uset![0, 3, 8, 10]);
+
+        let mut s3 = uset![3, 8, 10];
+        s3.add_all(&vec![1, 4]);
+        assert_that!(&s3).is_equal_to(uset![1, 3, 4, 8, 10]);
+
+        let mut s4 = uset![3, 8, 10];
+        s4.add_all(&vec![6, 12]);
+        assert_that!(&s4).is_equal_to(uset![3, 6, 8, 10, 12]);
+
+        let mut s5 = uset![3, 8, 10];
+        s5.add_all(&vec![1, 14]);
+        assert_that!(&s5).is_equal_to(uset![1, 3, 8, 10, 14]);
+
+        let mut s6 = uset![3, 8, 10];
+        s6.add_all(&vec![8, 10, 12]);
+        assert_that!(&s6).is_equal_to(uset![3, 8, 10, 12]);
+    }
+
+    #[test]
     fn should_mul() {
         let s1 = uset![0, 3, 8, 10];
         let s2 = uset![3, 8];
@@ -204,5 +231,28 @@ mod uset_tests {
 
         let s6 = uset![10];
         assert_that!((&s1 ^ &s6)).is_equal_to(uset![0, 3, 8]);
+    }
+
+    #[test]
+    fn should_implement_into_iter() {
+        let s = uset![3, 5, 8];
+        let mut sum = 0;
+        for i in &s {
+            sum += i;
+        }
+        assert_eq!(sum, 16);
+    }
+
+    #[test]
+    fn should_prune() {
+        let mut s = uset![3, 5, 8];
+        assert_eq!(3, s.len());
+        assert_eq!(INITIAL_CAPACITY, s.capacity());
+        s.remove(3);
+        assert_eq!(2, s.len());
+        assert_eq!(INITIAL_CAPACITY, s.capacity());
+        s.prune();
+        assert_eq!(2, s.len());
+        assert_eq!(4, s.capacity());
     }
 }

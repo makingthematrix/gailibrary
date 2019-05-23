@@ -8,6 +8,8 @@ extern crate derive_more;
 #[macro_use]
 extern crate lazy_static;
 
+extern crate rayon;
+
 pub mod engine;
 pub mod examples;
 pub mod fields;
