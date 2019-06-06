@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 
 pub trait AutomatonCell: Clone + Copy + PartialEq + Sized + Debug {
-    fn update(&self, neighborhood: &Neighborhood<Self>) -> Self;
+    fn update(&self, neighborhood: &dyn Neighborhood<Self>) -> Self;
     fn position(&self) -> Pos2D;
 
     fn new(pos: &Pos2D) -> Self;

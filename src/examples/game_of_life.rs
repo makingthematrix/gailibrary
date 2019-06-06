@@ -17,7 +17,7 @@ impl GameOfLife {
         }
     }
 
-    fn update_life(&self, neighborhood: &Neighborhood<Self>) -> bool {
+    fn update_life(&self, neighborhood: &dyn Neighborhood<Self>) -> bool {
         match neighborhood
             .moore(&self.pos)
             .iter()
@@ -32,7 +32,7 @@ impl GameOfLife {
 }
 
 impl AutomatonCell for GameOfLife {
-    fn update(&self, neighborhood: &Neighborhood<Self>) -> Self {
+    fn update(&self, neighborhood: &dyn Neighborhood<Self>) -> Self {
         GameOfLife {
             life: self.update_life(neighborhood),
             pos: self.pos,

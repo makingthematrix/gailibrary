@@ -27,7 +27,7 @@ impl LangtonsAnt {
         }
     }
 
-    fn update_dir(&self, neighborhood: &Neighborhood<Self>) -> Option<Dir2D> {
+    fn update_dir(&self, neighborhood: &dyn Neighborhood<Self>) -> Option<Dir2D> {
         if let Some((ref ant_dir, ..)) = neighborhood
             .neumann(&self.pos)
             .iter()
@@ -45,7 +45,7 @@ impl LangtonsAnt {
 }
 
 impl AutomatonCell for LangtonsAnt {
-    fn update(&self, neighborhood: &Neighborhood<Self>) -> Self {
+    fn update(&self, neighborhood: &dyn Neighborhood<Self>) -> Self {
         LangtonsAnt {
             color: self.update_color(),
             dir: self.update_dir(neighborhood),
